@@ -56,12 +56,12 @@ func (s *EventService) Start(port int) {
 		delete(s.sessions, streamID)
 	}
 	mux.HandleFunc("/events", s.server.ServeHTTP)
-	c := cors.New(cors.Options{
-		AllowedOrigins: []string{"*"},
-	})
+	c := cors.New(cors.Options{})
 	handler := c.Handler(mux)
-	http.ListenAndServe(fmt.Sprintf(":%d", port), handler)
-
+	err := http.ListenAndServe(fmt.Sprintf(":%d", port), handler)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func (s *EventService) Replay(token string) error {

@@ -4,31 +4,32 @@ import (
 	"embed"
 	"fmt"
 	"io/fs"
+	"log"
 	"net/http"
-	"os"
 )
 
 //go:embed all:dist
 var dist embed.FS
 
 type Static struct {
-	port int
+	port             int
+	eventServicePort int
 }
 
-func New(port int) *Static {
+func New(port, eventServicePort int) *Static {
 	return &Static{
-		port: port,
+		port:             port,
+		eventServicePort: eventServicePort,
 	}
 }
 
 func (s *Static) Serve() {
-	assets, _ := fs.Sub(dist, "static")
+	assets, _ := fs.Sub(dist, "dist")
 	fs := http.FileServer(http.FS(assets))
 	http.Handle("/", http.StripPrefix("/", fs))
 	fmt.Printf("running uitail on http://localhost:%d\n", s.port)
 	err := http.ListenAndServe(fmt.Sprintf(":%d", s.port), nil)
 	if err != nil {
-		fmt.Println("error running uitail: ", err)
-		os.Exit(1)
+		log.Fatal(err)
 	}
 }

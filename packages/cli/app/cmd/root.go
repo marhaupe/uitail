@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"bufio"
+	"bytes"
 	"errors"
 	"fmt"
 	"io"
@@ -11,6 +12,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/acarl005/stripansi"
 	"github.com/marhaupe/uitail/internal/events"
 	"github.com/marhaupe/uitail/internal/static"
 	"github.com/spf13/cobra"
@@ -67,7 +69,7 @@ func New() *Root {
 
 func (a *Root) Start() error {
 	if shouldStartWebServer {
-		static := static.New(webServerPort)
+		static := static.New(webServerPort, eventServerPort)
 		go static.Serve()
 	}
 	go a.eventService.Start(eventServerPort)
@@ -109,22 +111,33 @@ func (a *Root) startReadLoop() error {
 	}
 }
 
-func (r *Root) isNewLogGroup() bool {
-	return true
-}
-
 func (r *Root) parseText() (*Log, error) {
+	timestamp := time.Now()
 	var err error
+	openingBraceCount := 0
+	closingBraceCount := 0
+	lines := [][]byte{}
 	for line := r.line; line != nil; line, err = r.nextLine() {
 		if err != nil {
 			return nil, err
 		}
-		if r.isNewLogGroup() {
+		lines = append(lines, line)
+		for _, char := range line {
+			if char == '{' {
+				openingBraceCount++
+			}
+			if char == '}' {
+				closingBraceCount++
+			}
+		}
+		if openingBraceCount == closingBraceCount {
+			message := bytes.Join(lines, []byte{'\n'})
 			return &Log{
-				Timestamp: time.Now(),
-				Message:   string(line),
+				Timestamp: timestamp,
+				Message:   stripansi.Strip(string(message)),
 			}, nil
 		}
+
 	}
 	return nil, errors.New("no new log group found")
 }
