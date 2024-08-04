@@ -69,71 +69,65 @@ export function App() {
   }, []);
 
   return (
-    <div className="flex  flex-1 flex-col min-h-screen bg-slate-50 p-6">
-      {
-        <>
-          <Card className="mb-4">
-            <CardContent className="p-2">
-              <Histogram
-                logs={logs}
-                onTimeframeSelect={(after, before) => {
-                  setFilterState((prev) => ({
-                    ...prev,
-                    after,
-                    before,
-                  }));
-                }}
-              />
-            </CardContent>
-          </Card>
-          <Card className="relative">
-            <SearchQueryBuilder
-              filter={filterState}
-              ref={searchInputRef}
-              onFilterStateChange={(query) => setFilterState(query)}
-            />
-            {logs.length > 0 ? (
-              <CardContent className="overflow-scroll">
-                {logs.map((log) => (
-                  <div
-                    className="flex flex-row text-sm border-none"
-                    key={log.timestamp + log.message}
-                  >
-                    {log.message.trim().length > 0 ? (
-                      <LogEntry
-                        onSelectFromFilter={() => {
-                          setFilterState((prev) => ({
-                            ...prev,
-                            after: new Date(log.timestamp),
-                            before: undefined,
-                          }));
-                        }}
-                        onSelectToFilter={() => {
-                          setFilterState((prev) => ({
-                            ...prev,
-                            after: undefined,
-                            before: new Date(log.timestamp),
-                          }));
-                        }}
-                        log={log}
-                      />
-                    ) : (
-                      <div className="h-3" />
-                    )}
-                  </div>
-                ))}
-              </CardContent>
-            ) : (
-              <CardContent>
-                <div className="text-center text-slate-500 flex flex-row gap-2">
-                  Waiting for logs
-                  <LucideLoaderCircle className="animate-spin" />
-                </div>
-              </CardContent>
-            )}
-          </Card>
-        </>
-      }
+    <div className="flex flex-1 flex-col min-h-screen bg-slate-50 p-6">
+      <Card className="mb-4">
+        <CardContent className="p-2">
+          <Histogram
+            logs={logs}
+            onTimeframeSelect={(after, before) => {
+              setFilterState((prev) => ({
+                ...prev,
+                after,
+                before,
+              }));
+            }}
+          />
+        </CardContent>
+      </Card>
+      <Card className="relative flex flex-col flex-1">
+        <SearchQueryBuilder
+          filter={filterState}
+          ref={searchInputRef}
+          onFilterStateChange={(query) => setFilterState(query)}
+        />
+        {logs.length > 0 ? (
+          <CardContent className="overflow-scroll">
+            {logs.map((log) => (
+              <div
+                className="flex flex-row text-sm border-none"
+                key={log.timestamp + log.message}
+              >
+                {log.message.trim().length > 0 ? (
+                  <LogEntry
+                    onSelectFromFilter={() => {
+                      setFilterState((prev) => ({
+                        ...prev,
+                        after: new Date(log.timestamp),
+                        before: undefined,
+                      }));
+                    }}
+                    onSelectToFilter={() => {
+                      setFilterState((prev) => ({
+                        ...prev,
+                        after: undefined,
+                        before: new Date(log.timestamp),
+                      }));
+                    }}
+                    log={log}
+                  />
+                ) : (
+                  <div className="h-3" />
+                )}
+              </div>
+            ))}
+          </CardContent>
+        ) : (
+          <CardContent className="text-slate-500 flex flex-row gap-2 flex-1 justify-center items-center h-full">
+            Waiting for logs
+            <LucideLoaderCircle className="animate-spin" />
+          </CardContent>
+        )}
+      </Card>
     </div>
   );
 }
@@ -164,6 +158,7 @@ function LogEntry({
         </span>
       ));
   };
+
   return (
     <>
       <DropdownMenu>
@@ -172,10 +167,10 @@ function LogEntry({
         </DropdownMenuTrigger>
         <DropdownMenuContent>
           <DropdownMenuItem onClick={() => onSelectToFilter()}>
-            Only show logs before
+            Show logs before
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => onSelectFromFilter()}>
-            Only show logs after
+            Show logs after
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
