@@ -1,3 +1,4 @@
+import anser from "anser";
 import { useEffect, useState, useMemo, useRef } from "react";
 import { Bar, BarChart, XAxis } from "recharts";
 import {
@@ -83,7 +84,6 @@ export function App() {
             {logs.length > 0 ? (
               <CardContent>
                 {logs.map((log) => (
-                  // TODO: Make this a canvas vs a line by line thing. We e.g. want to make copying logs easier, the date musnt' interfere
                   <div
                     className="flex flex-row text-sm border-none"
                     key={log.timestamp + log.message}
@@ -112,13 +112,28 @@ export function App() {
 }
 
 function LogEntry({ log }: { log: Log }) {
+  const renderLogMessage = (message: string) => {
+    return anser
+      .ansiToJson(message, { use_classes: true })
+      .map((part: anser.AnserJsonEntry, index: number) => (
+        <span
+          key={index}
+          style={{
+            color: ANSI_COLOR_MAP[part.fg] || "inherit",
+            backgroundColor: ANSI_COLOR_MAP[part.bg] || "inherit",
+          }}
+        >
+          {part.content}
+        </span>
+      ));
+  };
   return (
     <>
       <div className="w-32 text-slate-400 font-mono text-sm tracking-tighter select-none">
         {new Date(log.timestamp).toISOString().split("T")[1]}
       </div>
       <div className="whitespace-pre font-mono text-sm tracking-tight">
-        {log.message}
+        {renderLogMessage(log.message)}
       </div>
     </>
   );
@@ -190,3 +205,22 @@ function Histogram({ logs }: HistogramProps) {
     </div>
   );
 }
+
+const ANSI_COLOR_MAP: Record<string, string> = {
+  "ansi-black": "#020617",
+  "ansi-red": "#DC143C",
+  "ansi-green": "#22c55e",
+  "ansi-yellow": "#eab308",
+  "ansi-blue": "#3b82f6",
+  "ansi-magenta": "#ec4899",
+  "ansi-cyan": "#6ee7b7",
+  "ansi-white": "#f8fafc",
+  "ansi-bright-black": "#64748b",
+  "ansi-bright-red": "#B22222",
+  "ansi-bright-green": "#228B22",
+  "ansi-bright-yellow": "#DAA520",
+  "ansi-bright-blue": "#191970",
+  "ansi-bright-magenta": "#800080",
+  "ansi-bright-cyan": "#00688B",
+  "ansi-bright-white": "#708090",
+};

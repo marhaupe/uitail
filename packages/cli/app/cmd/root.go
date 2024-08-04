@@ -12,7 +12,6 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/acarl005/stripansi"
 	"github.com/marhaupe/uitail/internal/events"
 	"github.com/marhaupe/uitail/internal/static"
 	"github.com/spf13/cobra"
@@ -134,7 +133,7 @@ func (r *Root) parseText() (*Log, error) {
 			message := bytes.Join(lines, []byte{'\n'})
 			return &Log{
 				Timestamp: timestamp,
-				Message:   stripansi.Strip(string(message)),
+				Message:   string(message),
 			}, nil
 		}
 
