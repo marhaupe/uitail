@@ -79,8 +79,8 @@ export function Histogram({ logs, onTimeframeSelect }: HistogramProps) {
         >
           <XAxis
             dataKey="startTime"
-            tickMargin={8}
-            minTickGap={32}
+            tickLine={false}
+            axisLine={false}
             tickFormatter={(time) => format(time, "HH:mm:ss")}
           />
 
@@ -88,7 +88,7 @@ export function Histogram({ logs, onTimeframeSelect }: HistogramProps) {
             labelFormatter={(time) => format(new Date(time), "HH:mm:ss")}
             formatter={(value) => [`${value}`, "Count"]}
           />
-          <Bar dataKey="count" fill="#8884d8" />
+          <Bar dataKey="count" />
         </BarChart>
       </ChartContainer>
     </div>

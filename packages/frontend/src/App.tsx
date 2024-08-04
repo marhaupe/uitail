@@ -6,7 +6,7 @@ import { Value } from "@sinclair/typebox/value";
 import { nanoid } from "nanoid";
 import { LucideLoaderCircle } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { SearchQueryBuilder } from "@/SearchBar";
+import { FilterState, SearchQueryBuilder } from "@/SearchBar";
 import { Histogram } from "@/Histogram";
 
 const logSchema = Type.Object({
@@ -19,18 +19,18 @@ export type Log = Static<typeof logSchema>;
 
 export function App() {
   const [logs, setLogs] = useState<Log[]>([]);
-  const [filter, setFilter] = useState("");
-  const [after, setAfter] = useState<Date | null>();
-  const [before, setBefore] = useState<Date | null>();
+  const [filterState, setFilterState] = useState<FilterState>({
+    message: "",
+  });
 
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const url = new URL("http://localhost:8788/events");
     url.searchParams.set("stream", nanoid());
-    url.searchParams.set("filter", filter);
-    url.searchParams.set("after", after?.toISOString() ?? "");
-    url.searchParams.set("before", before?.toISOString() ?? "");
+    url.searchParams.set("filter", filterState.message);
+    url.searchParams.set("after", filterState.after?.toISOString() ?? "");
+    url.searchParams.set("before", filterState.before?.toISOString() ?? "");
     const eventSource = new EventSource(url);
 
     eventSource.onmessage = (event: MessageEvent) => {
@@ -46,7 +46,7 @@ export function App() {
       setLogs([]);
       eventSource.close();
     };
-  }, [filter, after, before]);
+  }, [filterState]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -71,16 +71,20 @@ export function App() {
               <Histogram
                 logs={logs}
                 onTimeframeSelect={(after, before) => {
-                  setAfter(after);
-                  setBefore(before);
+                  setFilterState((prev) => ({
+                    ...prev,
+                    after,
+                    before,
+                  }));
                 }}
               />
             </CardContent>
           </Card>
           <Card className="relative">
             <SearchQueryBuilder
+              filter={filterState}
               ref={searchInputRef}
-              onSearch={(query) => setFilter(query)}
+              onFilterStateChange={(query) => setFilterState(query)}
             />
             {logs.length > 0 ? (
               <CardContent className="overflow-scroll">
