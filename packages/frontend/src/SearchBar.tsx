@@ -29,7 +29,7 @@ export const SearchQueryBuilder = forwardRef(function SearchQueryBuilder(
       >
         <input
           {...register("query")}
-          placeholder="Search..."
+          placeholder="Filter"
           className="px-3 py-2 flex-grow file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus:outline-none"
         />
         <Button
