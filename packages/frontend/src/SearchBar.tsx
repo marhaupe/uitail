@@ -20,27 +20,27 @@ export const SearchQueryBuilder = forwardRef(function SearchQueryBuilder(
   }));
 
   return (
-    <form
-      className="flex flex-row items-center justify-between h-10 w-full rounded-md border text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-      onSubmit={handleSubmit((data) => {
-        console.log(`dev: data`, data);
-        props.onSearch(data.query);
-      })}
-    >
-      <input
-        {...register("query")}
-        // ref={ref}
-        placeholder="Query"
-        className="px-3 py-2 flex-grow bg-transparent file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus:outline-none"
-      />
-      <Button
-        disabled={formState.isSubmitting}
-        className="p-2"
-        variant="default"
-        type="submit"
+    <div className="w-96 sticky top-4 ml-auto h-0">
+      <form
+        className="flex flex-row items-center justify-between h-10 rounded-md border text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 mt-4 mr-4"
+        onSubmit={handleSubmit((data) => {
+          props.onSearch(data.query);
+        })}
       >
-        <PlayIcon className="size-6" />
-      </Button>
-    </form>
+        <input
+          {...register("query")}
+          placeholder="Query"
+          className="px-3 py-2 flex-grow file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus:outline-none"
+        />
+        <Button
+          disabled={formState.isSubmitting}
+          className="p-2 rounded-l-none"
+          variant="outline"
+          type="submit"
+        >
+          <PlayIcon className="size-6" />
+        </Button>
+      </form>
+    </div>
   );
 });

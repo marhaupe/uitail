@@ -9,5 +9,5 @@ ui:
 build: ui
 	go build
 
-install: ui
+install: 
 	go install

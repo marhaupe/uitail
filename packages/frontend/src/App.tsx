@@ -11,7 +11,7 @@ import { Static, Type } from "@sinclair/typebox";
 import { Value } from "@sinclair/typebox/value";
 import { nanoid } from "nanoid";
 import { LucideLoaderCircle } from "lucide-react";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { SearchQueryBuilder } from "@/SearchBar";
 
 const logSchema = Type.Object({
@@ -74,13 +74,11 @@ export function App() {
               <Histogram logs={logs} />
             </CardContent>
           </Card>
-          <Card>
-            <CardHeader className="py-4 px-2">
-              <SearchQueryBuilder
-                ref={searchInputRef}
-                onSearch={(query) => setFilter(query)}
-              />
-            </CardHeader>
+          <Card className="relative">
+            <SearchQueryBuilder
+              ref={searchInputRef}
+              onSearch={(query) => setFilter(query)}
+            />
             {logs.length > 0 ? (
               <CardContent>
                 {logs.map((log) => (
