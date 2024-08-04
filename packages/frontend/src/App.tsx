@@ -8,6 +8,12 @@ import { LucideLoaderCircle } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { FilterState, SearchQueryBuilder } from "@/SearchBar";
 import { Histogram } from "@/Histogram";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const logSchema = Type.Object({
   timestamp: Type.String(),
@@ -94,7 +100,23 @@ export function App() {
                     key={log.timestamp + log.message}
                   >
                     {log.message.trim().length > 0 ? (
-                      <LogEntry log={log} />
+                      <LogEntry
+                        onSelectFromFilter={() => {
+                          setFilterState((prev) => ({
+                            ...prev,
+                            after: new Date(log.timestamp),
+                            before: undefined,
+                          }));
+                        }}
+                        onSelectToFilter={() => {
+                          setFilterState((prev) => ({
+                            ...prev,
+                            after: undefined,
+                            before: new Date(log.timestamp),
+                          }));
+                        }}
+                        log={log}
+                      />
                     ) : (
                       <div className="h-3" />
                     )}
@@ -116,7 +138,17 @@ export function App() {
   );
 }
 
-function LogEntry({ log }: { log: Log }) {
+type LogEntryProps = {
+  log: Log;
+  onSelectFromFilter: () => void;
+  onSelectToFilter: () => void;
+};
+
+function LogEntry({
+  log,
+  onSelectFromFilter,
+  onSelectToFilter,
+}: LogEntryProps) {
   const renderLogMessage = (message: string) => {
     return anser
       .ansiToJson(message, { use_classes: true })
@@ -134,9 +166,19 @@ function LogEntry({ log }: { log: Log }) {
   };
   return (
     <>
-      <div className="w-3 min-w-32 text-slate-400 font-mono text-sm tracking-tighter select-none">
-        {new Date(log.timestamp).toISOString().split("T")[1]}
-      </div>
+      <DropdownMenu>
+        <DropdownMenuTrigger className="flex flex-row justify-start w-32 min-w-32 text-slate-400 font-mono text-sm tracking-tighter select-none focus-visible:outline-none hover:underline">
+          {new Date(log.timestamp).toISOString().split("T")[1]}
+        </DropdownMenuTrigger>
+        <DropdownMenuContent>
+          <DropdownMenuItem onClick={() => onSelectToFilter()}>
+            Only show logs before
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => onSelectFromFilter()}>
+            Only show logs after
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
       <div className="whitespace-pre font-mono text-sm tracking-tight">
         {renderLogMessage(log.message)}
       </div>
