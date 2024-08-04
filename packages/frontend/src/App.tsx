@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import { Static, Type } from "@sinclair/typebox";
 import { Value } from "@sinclair/typebox/value";
 import { nanoid } from "nanoid";
-import { LucideLoaderCircle } from "lucide-react";
+import { ChevronsDown, ChevronsUp, LucideLoaderCircle } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { FilterState, SearchQueryBuilder } from "@/SearchBar";
 import { Histogram } from "@/Histogram";
@@ -14,6 +14,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
 
 const logSchema = Type.Object({
   timestamp: Type.String(),
@@ -85,6 +86,25 @@ export function App() {
         </CardContent>
       </Card>
       <Card className="relative flex flex-col flex-1">
+        <div className="fixed bottom-4 right-4 flex-row">
+          <Button
+            className="p-2"
+            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+          >
+            <ChevronsUp />
+          </Button>
+          <Button
+            className="p-2"
+            onClick={() =>
+              window.scrollTo({
+                top: document.body.scrollHeight,
+                behavior: "smooth",
+              })
+            }
+          >
+            <ChevronsDown />
+          </Button>
+        </div>
         <SearchQueryBuilder
           filter={filterState}
           ref={searchInputRef}

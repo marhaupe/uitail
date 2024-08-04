@@ -47,7 +47,6 @@ export const SearchQueryBuilder = forwardRef(function SearchQueryBuilder(
         <Button
           disabled={formState.isSubmitting}
           className="p-2 rounded-l-none"
-          variant="outline"
           type="submit"
         >
           <TextSearchIcon className="size-6" />
