@@ -10,9 +10,15 @@ import { useMemo } from "react";
 
 type HistogramProps = {
   logs: Log[];
+  onTimeframeSelect: (after: Date, before?: Date) => void;
 };
 
-export function Histogram({ logs }: HistogramProps) {
+type Bucket = {
+  startTime: Date;
+  count: number;
+};
+
+export function Histogram({ logs, onTimeframeSelect }: HistogramProps) {
   const buckets = useMemo(() => {
     if (logs.length === 0) {
       return [];
@@ -35,15 +41,18 @@ export function Histogram({ logs }: HistogramProps) {
       return differenceInSeconds(logDate, bucketDate) < 2;
     }
 
-    const buckets: Array<{ time: Date; count: number }> = [];
+    const buckets: Array<Bucket> = [];
     for (const log of logs) {
       const bucket = buckets[buckets.length - 1];
-      if (bucket && isInBucketTimeframe(new Date(log.timestamp), bucket.time)) {
+      if (
+        bucket &&
+        isInBucketTimeframe(new Date(log.timestamp), bucket.startTime)
+      ) {
         bucket.count++;
       } else {
         buckets.push({
           count: 1,
-          time: new Date(log.timestamp),
+          startTime: new Date(log.timestamp),
         });
       }
     }
@@ -58,9 +67,18 @@ export function Histogram({ logs }: HistogramProps) {
         className="aspect-auto h-[125px] w-full"
         config={chartConfig}
       >
-        <BarChart data={buckets}>
+        <BarChart
+          data={buckets}
+          onClick={(e) => {
+            const activeBucket = buckets[e.activeTooltipIndex ?? -1];
+            const nextBucket = buckets[(e.activeTooltipIndex ?? -1) + 1];
+            if (activeBucket) {
+              onTimeframeSelect(activeBucket.startTime, nextBucket?.startTime);
+            }
+          }}
+        >
           <XAxis
-            dataKey="time"
+            dataKey="startTime"
             tickMargin={8}
             minTickGap={32}
             tickFormatter={(time) => format(time, "HH:mm:ss")}

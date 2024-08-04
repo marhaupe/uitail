@@ -21,6 +21,8 @@ type EventService struct {
 type Session struct {
 	streamID string
 	filter   string
+	after    *time.Time
+	before   *time.Time
 }
 
 type Log struct {
@@ -43,11 +45,28 @@ func (s *EventService) Start(port int) {
 	mux := http.NewServeMux()
 	s.server.OnSubscribe = func(streamID string, sub *sse.Subscriber) {
 		filter := sub.URL.Query().Get("filter")
+
+		after := sub.URL.Query().Get("after")
+		afterTime, err := time.Parse(time.RFC3339, after)
+		afterTimeFilter := &afterTime
+		if err != nil {
+			afterTimeFilter = nil
+		}
+
+		before := sub.URL.Query().Get("before")
+		beforeTime, err := time.Parse(time.RFC3339, before)
+		beforeTimeFilter := &beforeTime
+		if err != nil {
+			beforeTimeFilter = nil
+		}
+
 		s.sessions[streamID] = Session{
 			streamID: streamID,
 			filter:   filter,
+			after:    afterTimeFilter,
+			before:   beforeTimeFilter,
 		}
-		err := s.Replay(streamID)
+		err = s.Replay(streamID)
 		if err != nil {
 			log.Printf("error replaying logs for new stream: %s\n", err)
 		}
@@ -74,7 +93,7 @@ func (s *EventService) Replay(token string) error {
 	}
 	filteredLogs := make([]Log, 0)
 	for _, log := range s.logs {
-		if matchFilter(session.filter, log.Message) {
+		if matchFilter(session, log) {
 			filteredLogs = append(filteredLogs, log)
 		}
 	}
@@ -95,7 +114,7 @@ func (s *EventService) Publish(l Log) error {
 		return fmt.Errorf("error marshalling log: %s", err)
 	}
 	for _, session := range s.sessions {
-		if !matchFilter(session.filter, l.Message) {
+		if !matchFilter(session, l) {
 			continue
 		}
 		s.server.Publish(session.streamID, &sse.Event{
@@ -105,9 +124,15 @@ func (s *EventService) Publish(l Log) error {
 	return nil
 }
 
-func matchFilter(filter string, message string) bool {
-	if filter == "" {
-		return true
+func matchFilter(session Session, l Log) bool {
+	if session.after != nil && l.Timestamp.Before(*session.after) {
+		return false
 	}
-	return strings.Contains(message, filter)
+	if session.before != nil && l.Timestamp.After(*session.before) {
+		return false
+	}
+	if len(session.filter) > 0 && !strings.Contains(l.Message, session.filter) {
+		return false
+	}
+	return true
 }

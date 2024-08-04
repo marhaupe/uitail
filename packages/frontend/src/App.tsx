@@ -20,6 +20,8 @@ export type Log = Static<typeof logSchema>;
 export function App() {
   const [logs, setLogs] = useState<Log[]>([]);
   const [filter, setFilter] = useState("");
+  const [after, setAfter] = useState<Date | null>();
+  const [before, setBefore] = useState<Date | null>();
 
   const searchInputRef = useRef<HTMLInputElement>(null);
 
@@ -27,8 +29,8 @@ export function App() {
     const url = new URL("http://localhost:8788/events");
     url.searchParams.set("stream", nanoid());
     url.searchParams.set("filter", filter);
-
-    console.log(`dev: filter`, filter);
+    url.searchParams.set("after", after?.toISOString() ?? "");
+    url.searchParams.set("before", before?.toISOString() ?? "");
     const eventSource = new EventSource(url);
 
     eventSource.onmessage = (event: MessageEvent) => {
@@ -44,7 +46,7 @@ export function App() {
       setLogs([]);
       eventSource.close();
     };
-  }, [filter]);
+  }, [filter, after, before]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -66,7 +68,13 @@ export function App() {
         <>
           <Card className="mb-4">
             <CardContent className="p-2">
-              <Histogram logs={logs} />
+              <Histogram
+                logs={logs}
+                onTimeframeSelect={(after, before) => {
+                  setAfter(after);
+                  setBefore(before);
+                }}
+              />
             </CardContent>
           </Card>
           <Card className="relative">
