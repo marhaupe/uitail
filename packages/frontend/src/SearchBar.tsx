@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { PlayIcon } from "lucide-react";
+import { TextSearchIcon } from "lucide-react";
 import { forwardRef, useImperativeHandle } from "react";
 import { useForm } from "react-hook-form";
 
@@ -29,7 +29,7 @@ export const SearchQueryBuilder = forwardRef(function SearchQueryBuilder(
       >
         <input
           {...register("query")}
-          placeholder="Query"
+          placeholder="Search..."
           className="px-3 py-2 flex-grow file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus:outline-none"
         />
         <Button
@@ -38,7 +38,7 @@ export const SearchQueryBuilder = forwardRef(function SearchQueryBuilder(
           variant="outline"
           type="submit"
         >
-          <PlayIcon className="size-6" />
+          <TextSearchIcon className="size-6" />
         </Button>
       </form>
     </div>

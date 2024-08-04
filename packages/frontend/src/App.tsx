@@ -80,7 +80,7 @@ export function App() {
               onSearch={(query) => setFilter(query)}
             />
             {logs.length > 0 ? (
-              <CardContent>
+              <CardContent className="overflow-scroll">
                 {logs.map((log) => (
                   <div
                     className="flex flex-row text-sm border-none"
@@ -127,7 +127,7 @@ function LogEntry({ log }: { log: Log }) {
   };
   return (
     <>
-      <div className="w-32 text-slate-400 font-mono text-sm tracking-tighter select-none">
+      <div className="w-32 min-w-32 text-slate-400 font-mono text-sm tracking-tighter select-none">
         {new Date(log.timestamp).toISOString().split("T")[1]}
       </div>
       <div className="whitespace-pre font-mono text-sm tracking-tight">
