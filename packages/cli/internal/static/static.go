@@ -27,7 +27,7 @@ func (s *Static) Serve() {
 	assets, _ := fs.Sub(dist, "dist")
 	fs := http.FileServer(http.FS(assets))
 	http.Handle("/", http.StripPrefix("/", fs))
-	fmt.Printf("running uitail on http://localhost:%d\n", s.port)
+	fmt.Printf("🚀 Running uitail on http://localhost:%d\n", s.port)
 	err := http.ListenAndServe(fmt.Sprintf(":%d", s.port), nil)
 	if err != nil {
 		log.Fatal(err)
