@@ -3,9 +3,7 @@ package cmd
 import (
 	"bufio"
 	"bytes"
-	"errors"
 	"fmt"
-	"io"
 	"log"
 	"os"
 	"os/signal"
@@ -48,7 +46,7 @@ func Execute() {
 
 type Root struct {
 	eventService *events.EventService
-	stdinReader  *bufio.Reader
+	in           *bufio.Scanner
 	line         []byte
 }
 
@@ -59,9 +57,10 @@ type Log struct {
 
 func New() *Root {
 	in := os.Stdin
-	bufSize := 65536
+	scanner := bufio.NewScanner(in)
+	scanner.Split(bufio.ScanBytes)
 	return &Root{
-		stdinReader:  bufio.NewReaderSize(in, bufSize),
+		in:           scanner,
 		eventService: events.New(),
 	}
 }
@@ -75,7 +74,7 @@ func (a *Root) Start() error {
 	return a.startReadLoop()
 }
 
-func (a *Root) startReadLoop() error {
+func (r *Root) startReadLoop() error {
 	terminateChan := make(chan os.Signal, 1)
 	signal.Notify(terminateChan, os.Interrupt, syscall.SIGTERM)
 	go func() {
@@ -87,19 +86,16 @@ func (a *Root) startReadLoop() error {
 		case <-terminateChan:
 			return nil
 		default:
-			line, err := a.nextLine()
-			if line == nil {
+			r.nextLine()
+			if r.line == nil {
 				continue
 			}
-			if err != nil {
-				log.Printf("error reading line: %s", err)
-			}
-			l, err := a.parseText()
+			l, err := r.parseText()
 			if err != nil {
 				log.Printf("error parsing line: %s", err)
 				continue
 			}
-			err = a.eventService.Publish(events.Log{
+			err = r.eventService.Publish(events.Log{
 				Timestamp: l.Timestamp,
 				Message:   l.Message,
 			})
@@ -112,16 +108,12 @@ func (a *Root) startReadLoop() error {
 
 func (r *Root) parseText() (*Log, error) {
 	timestamp := time.Now()
-	var err error
 	openingBraceCount := 0
 	closingBraceCount := 0
 	lines := [][]byte{}
-	for line := r.line; line != nil; line, err = r.nextLine() {
-		if err != nil {
-			return nil, err
-		}
-		lines = append(lines, line)
-		for _, char := range line {
+	for {
+		lines = append(lines, r.line)
+		for _, char := range r.line {
 			if char == '{' {
 				openingBraceCount++
 			}
@@ -131,46 +123,37 @@ func (r *Root) parseText() (*Log, error) {
 		}
 		if openingBraceCount == closingBraceCount {
 			message := bytes.Join(lines, []byte{'\n'})
+			// TODO: we need a way to clear logs from the UI
+			// TODO: make sure we can restart the process (to clear the logs, which we should fix, but anyways) without clearing state (filters, session)
 			return &Log{
 				Timestamp: timestamp,
 				Message:   string(message),
 			}, nil
 		}
+		r.nextLine()
 
 	}
-	return nil, errors.New("no new log group found")
 }
 
-func (r *Root) nextLine() ([]byte, error) {
-	line, err := r.readLine()
-	if line == nil {
-		return nil, nil
-	}
-	if err != nil {
-		return nil, err
-	}
-	r.line = line
-	return line, nil
-}
-
-func (r *Root) readLine() ([]byte, error) {
-	var wasPrefix bool
-	var lineBuf []byte
+// TODO: Maybe we need to make sure that this does not run forever?
+func (r *Root) nextLine() {
+	r.line = []byte{}
 	for {
-		line, isPrefix, err := r.stdinReader.ReadLine()
-		if err == io.EOF {
-			return nil, nil
-		} else if err != nil {
-			return nil, err
-		}
-		if wasPrefix || isPrefix {
-			wasPrefix = isPrefix
-			lineBuf = append(lineBuf, line...)
-			if !isPrefix {
-				return lineBuf, nil
-			}
+		r.in.Scan()
+		char := r.in.Bytes()
+		// Previously we were using bufio.ReadLine and then bufio.Scanner + bufio.ScanLine,
+		// but both were running into issues where a lot of empty reads would cause EOF errors.
+		// My best guess is that due to the async nature of this program, lines were partially
+		// being written, and subsequent reads would be reading empty bytes because the line
+		// still hadn't been fully written. The fact that just sleeping for a millisecond
+		// fixes it confirms that something like that was happening.
+		if len(char) == 0 {
+			time.Sleep(time.Millisecond * 10)
 			continue
 		}
-		return line, nil
+		if char[0] == '\n' {
+			return
+		}
+		r.line = append(r.line, char...)
 	}
 }

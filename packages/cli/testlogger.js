@@ -1,12 +1,10 @@
-async function main() {
-  console.log("testlogger.js");
-  console.log("got error", new Error("test error"));
-  console.log(`dev: message`, { dev: "dev" });
-  console.log(`dev: dev`, {
-    dev: "dev",
-  });
-}
+const fs = require("fs");
 
-main().then(() => {
-  process.exit();
+console.log("testlogger.js");
+console.log("got error", new Error("test error"));
+console.log(`dev: message`, { dev: "dev" });
+console.log(`dev: dev`, {
+  dev: "dev",
 });
+const data = fs.readFileSync("data.json", "utf8");
+console.log(`dev: data`, data);
