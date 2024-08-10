@@ -27,7 +27,6 @@ export const SearchQueryBuilder = forwardRef(function SearchQueryBuilder(
     },
   }));
 
-  console.log(`dev: props.filter`, props.filter);
   return (
     <div className="sticky rounded-md top-0 p-2 bg-background">
       <form

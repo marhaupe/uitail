@@ -4,7 +4,7 @@ import {
   ChartContainer,
   ChartTooltip,
 } from "@/components/ui/chart";
-import { format, differenceInSeconds } from "date-fns";
+import { format } from "date-fns";
 import { Log } from "@/App";
 import { useMemo } from "react";
 
@@ -18,43 +18,38 @@ type Bucket = {
   count: number;
 };
 
+const bucketCount = 100;
+
 export function Histogram({ logs, onTimeframeSelect }: HistogramProps) {
-  const buckets = useMemo(() => {
-    if (logs.length === 0) {
-      return [];
+  const buckets = useMemo((): Bucket[] => {
+    if (logs.length < bucketCount) {
+      return logs.map((log) => ({
+        startTime: new Date(log.timestamp),
+        count: 1,
+      }));
     }
-    const timeDiff = differenceInSeconds(
-      new Date(logs[logs.length - 1].timestamp),
-      new Date(logs[0].timestamp)
+    // should set a different unit depending on the timeframe
+    const startDate = new Date(logs[0].timestamp).setMilliseconds(0);
+    const endDate = new Date(logs[logs.length - 1].timestamp).setMilliseconds(
+      0
     );
-
-    function isInBucketTimeframe(logDate: Date, bucketDate: Date) {
-      if (timeDiff > 60 * 15) {
-        return differenceInSeconds(logDate, bucketDate) < 60;
-      }
-      if (timeDiff > 60 * 5) {
-        return differenceInSeconds(logDate, bucketDate) < 30;
-      }
-      if (timeDiff > 60) {
-        return differenceInSeconds(logDate, bucketDate) < 10;
-      }
-      return differenceInSeconds(logDate, bucketDate) < 2;
-    }
-
-    const buckets: Array<Bucket> = [];
-    for (const log of logs) {
-      const bucket = buckets[buckets.length - 1];
-      if (
-        bucket &&
-        isInBucketTimeframe(new Date(log.timestamp), bucket.startTime)
-      ) {
-        bucket.count++;
-      } else {
-        buckets.push({
-          count: 1,
-          startTime: new Date(log.timestamp),
-        });
-      }
+    const timeDiff = endDate - startDate;
+    // Maybe we can set the interval to either 100 or logs.length
+    const bucketInterval = timeDiff / bucketCount;
+    const buckets: Bucket[] = [];
+    for (let i = 0; i < bucketCount; i++) {
+      const bucketLogDate = new Date(startDate + i * bucketInterval);
+      const bucketLogs = logs.filter((log) => {
+        const logDate = new Date(log.timestamp);
+        return (
+          logDate >= bucketLogDate &&
+          logDate < new Date(bucketLogDate.getTime() + bucketInterval)
+        );
+      });
+      buckets.push({
+        startTime: bucketLogDate,
+        count: bucketLogs.length,
+      });
     }
     return buckets;
   }, [logs]);
@@ -81,14 +76,14 @@ export function Histogram({ logs, onTimeframeSelect }: HistogramProps) {
             dataKey="startTime"
             tickLine={false}
             axisLine={false}
-            tickFormatter={(time) => format(time, "HH:mm:ss")}
+            tickFormatter={(time) => format(time, "HH:mm:ss:SS")}
           />
 
           <ChartTooltip
-            labelFormatter={(time) => format(new Date(time), "HH:mm:ss")}
+            labelFormatter={(time) => format(new Date(time), "HH:mm:ss:SS")}
             formatter={(value) => [`${value}`, "Count"]}
           />
-          <Bar dataKey="count" />
+          <Bar isAnimationActive={false} dataKey="count" />
         </BarChart>
       </ChartContainer>
     </div>
