@@ -19,15 +19,7 @@ type EventService struct {
 	sessions  map[string]Session
 }
 
-type SessionStatus int
-
-const (
-	SessionStatusPaused SessionStatus = iota
-	SessionStatusActive
-)
-
 type Session struct {
-	status   SessionStatus
 	streamID string
 	filter   string
 	after    *time.Time
@@ -52,6 +44,7 @@ func New() *EventService {
 }
 
 func (s *EventService) Start(ssePort int) {
+	// todo: use iris also to host static files. we can get away with only occupying one port
 	app := iris.New()
 
 	crs := cors.New(cors.Options{
@@ -63,11 +56,6 @@ func (s *EventService) Start(ssePort int) {
 	app.Any("/events", iris.FromStd(func(w http.ResponseWriter, r *http.Request) {
 		s.sseServer.ServeHTTP(w, r)
 	}))
-
-	app.Post("/{streamID}/pause", func(c iris.Context) {
-		s.Pause(c.Params().Get("streamID"))
-		c.StatusCode(iris.StatusOK)
-	})
 
 	s.sseServer.OnSubscribe = func(streamID string, sub *sse.Subscriber) {
 		filter := sub.URL.Query().Get("filter")
@@ -103,28 +91,6 @@ func (s *EventService) Start(ssePort int) {
 
 	log.Fatal(app.Listen(fmt.Sprintf(":%d", ssePort)))
 
-}
-
-func (s *EventService) Pause(token string) {
-	if !s.sseServer.StreamExists(token) {
-		return
-	}
-	session, ok := s.sessions[token]
-	if !ok {
-		return
-	}
-	session.status = SessionStatusPaused
-}
-
-func (s *EventService) Resume(token string) {
-	if !s.sseServer.StreamExists(token) {
-		return
-	}
-	session, ok := s.sessions[token]
-	if !ok {
-		return
-	}
-	session.status = SessionStatusActive
 }
 
 func (s *EventService) Replay(token string) error {

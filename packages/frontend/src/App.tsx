@@ -25,6 +25,7 @@ const logsSchema = Type.Array(logSchema);
 export type Log = Static<typeof logSchema>;
 
 export function App() {
+  const [isPaused, setIsPaused] = useState(false);
   const [logs, setLogs] = useState<Log[]>([]);
   const [filterState, setFilterState] = useState<FilterState>({
     message: "",
@@ -32,15 +33,30 @@ export function App() {
 
   const searchInputRef = useRef<HTMLInputElement>(null);
 
+  const [eventSource, setEventSource] = useState<EventSource>();
+
   useEffect(() => {
     const url = new URL("http://localhost:8788/events");
     url.searchParams.set("stream", nanoid());
     url.searchParams.set("filter", filterState.message);
     url.searchParams.set("after", filterState.after?.toISOString() ?? "");
     url.searchParams.set("before", filterState.before?.toISOString() ?? "");
-    const eventSource = new EventSource(url);
+    const newEventSource = new EventSource(url);
+    setEventSource(newEventSource);
+    return () => {
+      setLogs([]);
+      newEventSource.close();
+    };
+  }, [filterState]);
 
+  useEffect(() => {
+    if (!eventSource) {
+      return;
+    }
     eventSource.onmessage = (event: MessageEvent) => {
+      if (isPaused) {
+        return;
+      }
       try {
         const logs = Value.Decode(logsSchema, JSON.parse(event.data));
         setLogs((prevLogs) => [...prevLogs, ...logs]);
@@ -48,12 +64,7 @@ export function App() {
         console.error("error parsing log", error);
       }
     };
-
-    return () => {
-      setLogs([]);
-      eventSource.close();
-    };
-  }, [filterState]);
+  }, [eventSource, isPaused]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -71,8 +82,14 @@ export function App() {
 
   return (
     <div className="flex flex-1 flex-col min-h-screen bg-slate-50 p-6">
-      <Card className="mb-4">
+      <Card className="mb-4 relative">
         <CardContent className="p-2">
+          <Button
+            className="p-2 absolute top-2 right-2 z-40"
+            onClick={() => setIsPaused((prev) => !prev)}
+          >
+            {isPaused ? "Resume" : "Pause"}
+          </Button>
           <Histogram
             logs={logs}
             onTimeframeSelect={(after, before) => {
