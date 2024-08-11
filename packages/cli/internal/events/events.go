@@ -8,17 +8,26 @@ import (
 	"strings"
 	"time"
 
+	"github.com/iris-contrib/middleware/cors"
+	"github.com/kataras/iris/v12"
 	"github.com/r3labs/sse/v2"
-	"github.com/rs/cors"
 )
 
 type EventService struct {
-	logs     []Log
-	server   *sse.Server
-	sessions map[string]Session
+	logs      []Log
+	sseServer *sse.Server
+	sessions  map[string]Session
 }
 
+type SessionStatus int
+
+const (
+	SessionStatusPaused SessionStatus = iota
+	SessionStatusActive
+)
+
 type Session struct {
+	status   SessionStatus
 	streamID string
 	filter   string
 	after    *time.Time
@@ -31,19 +40,36 @@ type Log struct {
 }
 
 func New() *EventService {
-	server := sse.New()
-	server.AutoReplay = false
-	server.AutoStream = true
+	sseServer := sse.New()
+	sseServer.AutoReplay = false
+	sseServer.AutoStream = true
+
 	return &EventService{
-		server:   server,
-		logs:     make([]Log, 0),
-		sessions: make(map[string]Session),
+		sseServer: sseServer,
+		logs:      make([]Log, 0),
+		sessions:  make(map[string]Session),
 	}
 }
 
-func (s *EventService) Start(port int) {
-	mux := http.NewServeMux()
-	s.server.OnSubscribe = func(streamID string, sub *sse.Subscriber) {
+func (s *EventService) Start(ssePort int) {
+	app := iris.New()
+
+	crs := cors.New(cors.Options{
+		AllowedOrigins:   []string{"*"},
+		AllowCredentials: true,
+	})
+	app.UseRouter(crs)
+
+	app.Any("/events", iris.FromStd(func(w http.ResponseWriter, r *http.Request) {
+		s.sseServer.ServeHTTP(w, r)
+	}))
+
+	app.Post("/{streamID}/pause", func(c iris.Context) {
+		s.Pause(c.Params().Get("streamID"))
+		c.StatusCode(iris.StatusOK)
+	})
+
+	s.sseServer.OnSubscribe = func(streamID string, sub *sse.Subscriber) {
 		filter := sub.URL.Query().Get("filter")
 
 		after := sub.URL.Query().Get("after")
@@ -71,20 +97,38 @@ func (s *EventService) Start(port int) {
 			log.Printf("error replaying logs for new stream: %s\n", err)
 		}
 	}
-	s.server.OnUnsubscribe = func(streamID string, sub *sse.Subscriber) {
+	s.sseServer.OnUnsubscribe = func(streamID string, sub *sse.Subscriber) {
 		delete(s.sessions, streamID)
 	}
-	mux.HandleFunc("/events", s.server.ServeHTTP)
-	c := cors.New(cors.Options{})
-	handler := c.Handler(mux)
-	err := http.ListenAndServe(fmt.Sprintf(":%d", port), handler)
-	if err != nil {
-		log.Fatal(err)
+
+	log.Fatal(app.Listen(fmt.Sprintf(":%d", ssePort)))
+
+}
+
+func (s *EventService) Pause(token string) {
+	if !s.sseServer.StreamExists(token) {
+		return
 	}
+	session, ok := s.sessions[token]
+	if !ok {
+		return
+	}
+	session.status = SessionStatusPaused
+}
+
+func (s *EventService) Resume(token string) {
+	if !s.sseServer.StreamExists(token) {
+		return
+	}
+	session, ok := s.sessions[token]
+	if !ok {
+		return
+	}
+	session.status = SessionStatusActive
 }
 
 func (s *EventService) Replay(token string) error {
-	if !s.server.StreamExists(token) {
+	if !s.sseServer.StreamExists(token) {
 		return fmt.Errorf("stream does not exist")
 	}
 	session, ok := s.sessions[token]
@@ -101,7 +145,7 @@ func (s *EventService) Replay(token string) error {
 	if err != nil {
 		return fmt.Errorf("error marshalling logs: %s", err)
 	}
-	s.server.Publish(token, &sse.Event{
+	s.sseServer.Publish(token, &sse.Event{
 		Data: data,
 	})
 	return nil
@@ -117,7 +161,7 @@ func (s *EventService) Publish(l Log) error {
 		if !matchFilter(session, l) {
 			continue
 		}
-		s.server.Publish(session.streamID, &sse.Event{
+		s.sseServer.Publish(session.streamID, &sse.Event{
 			Data: data,
 		})
 	}

@@ -26,15 +26,17 @@ var rootCmd = &cobra.Command{
 }
 
 var (
-	shouldStartWebServer bool
-	webServerPort        int
-	eventServerPort      int
+	shouldStartWebServer      bool
+	webServerPort             int
+	eventServerPort           int
+	eventServerControllerPort int
 )
 
 func init() {
 	rootCmd.Flags().BoolVarP(&shouldStartWebServer, "web", "w", true, "start web server")
 	rootCmd.Flags().IntVarP(&webServerPort, "port", "p", 8787, "port to start web server on")
 	rootCmd.Flags().IntVarP(&eventServerPort, "event-port", "e", 8788, "port to start event server on")
+	rootCmd.Flags().IntVarP(&eventServerControllerPort, "event-controller-port", "c", 8789, "port to start event controller server on")
 }
 
 func Execute() {
