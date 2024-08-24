@@ -27,6 +27,7 @@ var rootCmd = &cobra.Command{
 
 var (
 	shouldStartWebServer      bool
+	port                      int
 	webServerPort             int
 	eventServerPort           int
 	eventServerControllerPort int

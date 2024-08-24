@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/iris-contrib/middleware/cors"
@@ -16,7 +17,7 @@ import (
 type EventService struct {
 	logs      []Log
 	sseServer *sse.Server
-	sessions  map[string]Session
+	sessions  sync.Map
 }
 
 type Session struct {
@@ -39,7 +40,7 @@ func New() *EventService {
 	return &EventService{
 		sseServer: sseServer,
 		logs:      make([]Log, 0),
-		sessions:  make(map[string]Session),
+		sessions:  sync.Map{},
 	}
 }
 
@@ -59,7 +60,6 @@ func (s *EventService) Start(ssePort int) {
 
 	s.sseServer.OnSubscribe = func(streamID string, sub *sse.Subscriber) {
 		filter := sub.URL.Query().Get("filter")
-
 		after := sub.URL.Query().Get("after")
 		afterTime, err := time.Parse(time.RFC3339, after)
 		afterTimeFilter := &afterTime
@@ -74,19 +74,19 @@ func (s *EventService) Start(ssePort int) {
 			beforeTimeFilter = nil
 		}
 
-		s.sessions[streamID] = Session{
+		s.sessions.Store(streamID, Session{
 			streamID: streamID,
 			filter:   filter,
 			after:    afterTimeFilter,
 			before:   beforeTimeFilter,
-		}
+		})
 		err = s.Replay(streamID)
 		if err != nil {
 			log.Printf("error replaying logs for new stream: %s\n", err)
 		}
 	}
 	s.sseServer.OnUnsubscribe = func(streamID string, sub *sse.Subscriber) {
-		delete(s.sessions, streamID)
+		s.sessions.Delete(streamID)
 	}
 
 	log.Fatal(app.Listen(fmt.Sprintf(":%d", ssePort)))
@@ -97,10 +97,16 @@ func (s *EventService) Replay(token string) error {
 	if !s.sseServer.StreamExists(token) {
 		return fmt.Errorf("stream does not exist")
 	}
-	session, ok := s.sessions[token]
+
+	storedSession, ok := s.sessions.Load(token)
 	if !ok {
 		return fmt.Errorf("session does not exist")
 	}
+	session, ok := storedSession.(Session)
+	if !ok {
+		return fmt.Errorf("session is not of type Session")
+	}
+
 	filteredLogs := make([]Log, 0)
 	for _, log := range s.logs {
 		if matchFilter(session, log) {
@@ -123,14 +129,17 @@ func (s *EventService) Publish(l Log) error {
 	if err != nil {
 		return fmt.Errorf("error marshalling log: %s", err)
 	}
-	for _, session := range s.sessions {
-		if !matchFilter(session, l) {
-			continue
+	s.sessions.Range(func(key, sessionData interface{}) bool {
+		session, ok := sessionData.(Session)
+		if !ok || !matchFilter(session, l) {
+			return true
 		}
 		s.sseServer.Publish(session.streamID, &sse.Event{
 			Data: data,
 		})
-	}
+		return true
+	})
+
 	return nil
 }
 

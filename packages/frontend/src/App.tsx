@@ -38,9 +38,21 @@ export function App() {
   useEffect(() => {
     const url = new URL("http://localhost:8788/events");
     url.searchParams.set("stream", nanoid());
-    url.searchParams.set("filter", filterState.message);
-    url.searchParams.set("after", filterState.after?.toISOString() ?? "");
-    url.searchParams.set("before", filterState.before?.toISOString() ?? "");
+    if (filterState.message.trim().length > 0) {
+      url.searchParams.set("filter", filterState.message);
+    } else {
+      url.searchParams.delete("filter");
+    }
+    if (filterState.after) {
+      url.searchParams.set("after", filterState.after.toISOString());
+    } else {
+      url.searchParams.delete("after");
+    }
+    if (filterState.before) {
+      url.searchParams.set("before", filterState.before.toISOString());
+    } else {
+      url.searchParams.delete("before");
+    }
     const newEventSource = new EventSource(url);
     setEventSource(newEventSource);
     return () => {
