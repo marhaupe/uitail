@@ -3,6 +3,7 @@ package cmd
 import (
 	"bufio"
 	"bytes"
+	"context"
 	"fmt"
 	"log"
 	"os"
@@ -66,20 +67,29 @@ func New() *Root {
 }
 
 func (a *Root) Start() error {
-	app := iris.New()
-
-	crs := cors.New(cors.Options{
-		AllowedOrigins:   []string{"*"},
-		AllowCredentials: true,
-	})
-	app.UseRouter(crs)
-
-	app.Any("/events", a.eventService.Handler())
-	app.Get("/{asset:path}", a.staticServer.Handler())
-
-	// Start the server
 	go func() {
-		if err := app.Listen(fmt.Sprintf(":%d", port)); err != nil {
+		config := iris.WithConfiguration(iris.Configuration{
+			DisableStartupLog: true,
+		})
+		app := iris.New()
+
+		crs := cors.New(cors.Options{
+			AllowedOrigins: []string{"*"},
+		})
+		app.UseRouter(crs)
+
+		iris.RegisterOnInterrupt(func() {
+			timeout := 10 * time.Second
+			ctx, cancel := context.WithTimeout(context.Background(), timeout)
+			defer cancel()
+			app.Shutdown(ctx)
+			// Maybe close event service here?
+		})
+
+		app.Any("/events", a.eventService.Handler())
+		app.Get("/{asset:path}", a.staticServer.Handler())
+
+		if err := app.Listen(fmt.Sprintf(":%d", port), config); err != nil {
 			log.Fatalf("Failed to start server: %v", err)
 		}
 	}()
