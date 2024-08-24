@@ -31,14 +31,14 @@ export function Histogram({ logs, onTimeframeSelect }: HistogramProps) {
           logs.map((log) => ({
             startTime: new Date(log.timestamp),
             count: 1,
-          }))
+          })),
         );
         return;
       }
       // should set a different unit depending on the timeframe
       const startDate = new Date(logs[0].timestamp).setMilliseconds(0);
       const endDate = new Date(logs[logs.length - 1].timestamp).setMilliseconds(
-        0
+        0,
       );
       const timeDiff = endDate - startDate;
       // Maybe we can set the interval to either 100 or logs.length
@@ -60,44 +60,10 @@ export function Histogram({ logs, onTimeframeSelect }: HistogramProps) {
       }
       setBuckets(buckets);
     }, 1000),
-    [setBuckets]
+    [setBuckets],
   );
 
   useEffect(() => throttledSetBuckets(logs), [logs, throttledSetBuckets]);
-
-  // const buckets = useMemo((): Bucket[] => {
-  //   if (logs.length < bucketCount) {
-  //     return logs.map((log) => ({
-  //       startTime: new Date(log.timestamp),
-  //       count: 1,
-  //     }));
-  //   }
-  //   // should set a different unit depending on the timeframe
-  //   const startDate = new Date(logs[0].timestamp).setMilliseconds(0);
-  //   const endDate = new Date(logs[logs.length - 1].timestamp).setMilliseconds(
-  //     0
-  //   );
-  //   const timeDiff = endDate - startDate;
-  //   console.log(`dev: timeDiff`, timeDiff);
-  //   // Maybe we can set the interval to either 100 or logs.length
-  //   const bucketInterval = timeDiff / bucketCount;
-  //   const buckets: Bucket[] = [];
-  //   for (let i = 0; i < bucketCount; i++) {
-  //     const bucketLogDate = new Date(startDate + i * bucketInterval);
-  //     const bucketLogs = logs.filter((log) => {
-  //       const logDate = new Date(log.timestamp);
-  //       return (
-  //         logDate >= bucketLogDate &&
-  //         logDate < new Date(bucketLogDate.getTime() + bucketInterval)
-  //       );
-  //     });
-  //     buckets.push({
-  //       startTime: bucketLogDate,
-  //       count: bucketLogs.length,
-  //     });
-  //   }
-  //   return buckets;
-  // }, [logs]);
 
   const chartConfig = {} satisfies ChartConfig;
 

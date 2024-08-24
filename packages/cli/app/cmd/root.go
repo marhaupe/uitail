@@ -10,7 +10,10 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/iris-contrib/middleware/cors"
+	"github.com/kataras/iris/v12"
 	"github.com/marhaupe/uitail/internal/events"
+	"github.com/marhaupe/uitail/internal/static"
 	"github.com/spf13/cobra"
 )
 
@@ -25,18 +28,11 @@ var rootCmd = &cobra.Command{
 }
 
 var (
-	shouldStartWebServer      bool
-	port                      int
-	webServerPort             int
-	eventServerPort           int
-	eventServerControllerPort int
+	port int
 )
 
 func init() {
-	rootCmd.Flags().BoolVarP(&shouldStartWebServer, "web", "w", true, "start web server")
-	rootCmd.Flags().IntVarP(&webServerPort, "port", "p", 8787, "port to start web server on")
-	rootCmd.Flags().IntVarP(&eventServerPort, "event-port", "e", 8788, "port to start event server on")
-	rootCmd.Flags().IntVarP(&eventServerControllerPort, "event-controller-port", "c", 8789, "port to start event controller server on")
+	rootCmd.Flags().IntVarP(&port, "port", "p", 8787, "port to start the server on")
 }
 
 func Execute() {
@@ -48,6 +44,7 @@ func Execute() {
 
 type Root struct {
 	eventService *events.EventService
+	staticServer *static.Static
 	in           *bufio.Scanner
 	line         []byte
 }
@@ -64,15 +61,31 @@ func New() *Root {
 	return &Root{
 		in:           scanner,
 		eventService: events.New(),
+		staticServer: static.New(),
 	}
 }
 
 func (a *Root) Start() error {
-	// if shouldStartWebServer {
-	// 	static := static.New(webServerPort, eventServerPort)
-	// 	go static.Serve()
-	// }
-	go a.eventService.Start(eventServerPort)
+	app := iris.New()
+
+	crs := cors.New(cors.Options{
+		AllowedOrigins:   []string{"*"},
+		AllowCredentials: true,
+	})
+	app.UseRouter(crs)
+
+	app.Any("/events", a.eventService.Handler())
+	app.Get("/{asset:path}", a.staticServer.Handler())
+
+	// Start the server
+	go func() {
+		if err := app.Listen(fmt.Sprintf(":%d", port)); err != nil {
+			log.Fatalf("Failed to start server: %v", err)
+		}
+	}()
+
+	fmt.Printf("🚀 Running uitail on http://localhost:%d\n", port)
+
 	return a.startReadLoop()
 }
 
@@ -125,30 +138,20 @@ func (r *Root) parseText() (*Log, error) {
 		}
 		if openingBraceCount == closingBraceCount {
 			message := bytes.Join(lines, []byte{'\n'})
-			// TODO: we need a way to clear logs from the UI
-			// TODO: make sure we can restart the process (to clear the logs, which we should fix, but anyways) without clearing state (filters, session)
 			return &Log{
 				Timestamp: timestamp,
 				Message:   string(message),
 			}, nil
 		}
 		r.nextLine()
-
 	}
 }
 
-// TODO: Maybe we need to make sure that this does not run forever?
 func (r *Root) nextLine() {
 	r.line = []byte{}
 	for {
 		r.in.Scan()
 		char := r.in.Bytes()
-		// Previously we were using bufio.ReadLine and then bufio.Scanner + bufio.ScanLine,
-		// but both were running into issues where a lot of empty reads would cause EOF errors.
-		// My best guess is that due to the async nature of this program, lines were partially
-		// being written, and subsequent reads would be reading empty bytes because the line
-		// still hadn't been fully written. The fact that just sleeping for a millisecond
-		// fixes it confirms that something like that was happening.
 		if len(char) == 0 {
 			time.Sleep(time.Millisecond * 10)
 			continue

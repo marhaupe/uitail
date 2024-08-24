@@ -1,6 +1,5 @@
-
 dev: install
-	cd ~/Entwicklung/mono && nx run website:serve 2>&1 | uitail
+	node testlogger.js 2>&1 | go run main.go
 
 ui:
 	rm -rf internal/static/dist

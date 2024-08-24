@@ -15,6 +15,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
+import { config } from "./config";
 
 const logSchema = Type.Object({
   timestamp: Type.String(),
@@ -36,7 +37,7 @@ export function App() {
   const [eventSource, setEventSource] = useState<EventSource>();
 
   useEffect(() => {
-    const url = new URL("http://localhost:8788/events");
+    const url = new URL(config.agentUrl);
     url.searchParams.set("stream", nanoid());
     if (filterState.message.trim().length > 0) {
       url.searchParams.set("filter", filterState.message);
@@ -192,7 +193,15 @@ function LogEntry({
   onSelectFromFilter,
   onSelectToFilter,
 }: LogEntryProps) {
+  const [collapsed, setCollapsed] = useState(false);
+
   const renderLogMessage = (message: string) => {
+    if (collapsed) {
+      const messageLines = message.split("\n");
+      message = messageLines
+        .slice(0, Math.min(messageLines.length, 3))
+        .join("\n");
+    }
     return anser
       .ansiToJson(message, { use_classes: true })
       .map((part: anser.AnserJsonEntry, index: number) => (
@@ -215,10 +224,13 @@ function LogEntry({
           {new Date(log.timestamp).toISOString().split("T")[1]}
         </DropdownMenuTrigger>
         <DropdownMenuContent>
-          <DropdownMenuItem onClick={() => onSelectToFilter()}>
+          <DropdownMenuItem onClick={() => setCollapsed((prev) => !prev)}>
+            {collapsed ? "Expand" : "Collapse"}
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={onSelectToFilter}>
             Show logs before
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => onSelectFromFilter()}>
+          <DropdownMenuItem onClick={onSelectFromFilter}>
             Show logs after
           </DropdownMenuItem>
         </DropdownMenuContent>

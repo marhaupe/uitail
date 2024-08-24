@@ -4,12 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"net/http"
 	"strings"
 	"sync"
 	"time"
 
-	"github.com/iris-contrib/middleware/cors"
 	"github.com/kataras/iris/v12"
 	"github.com/r3labs/sse/v2"
 )
@@ -33,31 +31,24 @@ type Log struct {
 }
 
 func New() *EventService {
-	sseServer := sse.New()
-	sseServer.AutoReplay = false
-	sseServer.AutoStream = true
-
-	return &EventService{
-		sseServer: sseServer,
+	service := &EventService{
+		sseServer: sse.New(),
 		logs:      make([]Log, 0),
 		sessions:  sync.Map{},
 	}
+	service.setup()
+	return service
 }
 
-func (s *EventService) Start(ssePort int) {
-	// todo: use iris also to host static files. we can get away with only occupying one port
-	app := iris.New()
+func (s *EventService) Handler() iris.Handler {
+	return func(ctx iris.Context) {
+		s.sseServer.ServeHTTP(ctx.ResponseWriter(), ctx.Request())
+	}
+}
 
-	crs := cors.New(cors.Options{
-		AllowedOrigins:   []string{"*"},
-		AllowCredentials: true,
-	})
-	app.UseRouter(crs)
-
-	app.Any("/events", iris.FromStd(func(w http.ResponseWriter, r *http.Request) {
-		s.sseServer.ServeHTTP(w, r)
-	}))
-
+func (s *EventService) setup() {
+	s.sseServer.AutoReplay = false
+	s.sseServer.AutoStream = true
 	s.sseServer.OnSubscribe = func(streamID string, sub *sse.Subscriber) {
 		filter := sub.URL.Query().Get("filter")
 		after := sub.URL.Query().Get("after")
@@ -88,9 +79,6 @@ func (s *EventService) Start(ssePort int) {
 	s.sseServer.OnUnsubscribe = func(streamID string, sub *sse.Subscriber) {
 		s.sessions.Delete(streamID)
 	}
-
-	log.Fatal(app.Listen(fmt.Sprintf(":%d", ssePort)))
-
 }
 
 func (s *EventService) Replay(token string) error {
