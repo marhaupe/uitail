@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/marhaupe/uitail/internal/events"
-	"github.com/marhaupe/uitail/internal/static"
 	"github.com/spf13/cobra"
 )
 
@@ -69,10 +68,10 @@ func New() *Root {
 }
 
 func (a *Root) Start() error {
-	if shouldStartWebServer {
-		static := static.New(webServerPort, eventServerPort)
-		go static.Serve()
-	}
+	// if shouldStartWebServer {
+	// 	static := static.New(webServerPort, eventServerPort)
+	// 	go static.Serve()
+	// }
 	go a.eventService.Start(eventServerPort)
 	return a.startReadLoop()
 }
