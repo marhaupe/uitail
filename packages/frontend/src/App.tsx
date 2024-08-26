@@ -4,7 +4,13 @@ import { useEffect, useState, useRef } from "react";
 import { Static, Type } from "@sinclair/typebox";
 import { Value } from "@sinclair/typebox/value";
 import { nanoid } from "nanoid";
-import { ChevronsDown, ChevronsUp, LucideLoaderCircle } from "lucide-react";
+import {
+  ChevronsDown,
+  ChevronsUp,
+  LucideLoaderCircle,
+  PauseIcon,
+  PlayIcon,
+} from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { FilterState, SearchQueryBuilder } from "@/SearchBar";
 import { Histogram } from "@/Histogram";
@@ -98,10 +104,15 @@ export function App() {
       <Card className="mb-4 relative">
         <CardContent className="p-2">
           <Button
+            variant="ghost"
             className="p-2 absolute top-2 right-2 z-40"
             onClick={() => setIsPaused((prev) => !prev)}
           >
-            {isPaused ? "Resume" : "Pause"}
+            {isPaused ? (
+              <PlayIcon className="h-6 w-6" />
+            ) : (
+              <PauseIcon className="h-6 w-6" />
+            )}
           </Button>
           <Histogram
             logs={logs}
@@ -116,14 +127,16 @@ export function App() {
         </CardContent>
       </Card>
       <Card className="relative flex flex-col flex-1">
-        <div className="fixed bottom-4 right-4 flex-row">
+        <div className="flex fixed bottom-4 right-4 flex-row gap-1">
           <Button
+            variant="outline"
             className="p-2"
             onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
           >
             <ChevronsUp />
           </Button>
           <Button
+            variant="outline"
             className="p-2"
             onClick={() =>
               window.scrollTo({

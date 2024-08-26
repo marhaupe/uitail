@@ -1,4 +1,4 @@
-import { Bar, BarChart, XAxis } from "recharts";
+import { Bar, BarChart, XAxis, YAxis } from "recharts";
 import {
   ChartConfig,
   ChartContainer,
@@ -59,13 +59,14 @@ export function Histogram({ logs, onTimeframeSelect }: HistogramProps) {
         });
       }
       setBuckets(buckets);
-    }, 1000),
+    }, 2500),
     [setBuckets],
   );
 
   useEffect(() => throttledSetBuckets(logs), [logs, throttledSetBuckets]);
 
   const chartConfig = {} satisfies ChartConfig;
+  const maxBucketCount = Math.max(...buckets.map((b) => b.count));
 
   return (
     <div className="flex flex-row justify-center">
@@ -88,6 +89,18 @@ export function Histogram({ logs, onTimeframeSelect }: HistogramProps) {
             tickLine={false}
             axisLine={false}
             tickFormatter={(time) => format(time, "HH:mm:ss:SS")}
+          />
+          <YAxis
+            domain={[
+              0,
+              maxBucketCount > 500
+                ? 500
+                : maxBucketCount > 250
+                  ? 250
+                  : maxBucketCount > 100
+                    ? 100
+                    : 50,
+            ]}
           />
 
           <ChartTooltip

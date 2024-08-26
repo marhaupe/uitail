@@ -8,7 +8,7 @@ async function main() {
     console.log(`dev: dev`, {
       dev: "dev",
     });
-    await new Promise((resolve) => setTimeout(resolve, Math.random() * 1000));
+    await new Promise((resolve) => setTimeout(resolve, Math.random() * 4000));
   }
 }
 

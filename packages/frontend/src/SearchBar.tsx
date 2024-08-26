@@ -17,7 +17,7 @@ export type FilterState = {
 
 export const SearchQueryBuilder = forwardRef(function SearchQueryBuilder(
   props: Props,
-  ref
+  ref,
 ) {
   const { register, handleSubmit, formState, setFocus } = useForm();
 
@@ -46,6 +46,7 @@ export const SearchQueryBuilder = forwardRef(function SearchQueryBuilder(
         <Button
           disabled={formState.isSubmitting}
           className="p-2 rounded-l-none"
+          variant="outline"
           type="submit"
         >
           <TextSearchIcon className="size-6" />
