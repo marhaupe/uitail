@@ -16,7 +16,7 @@ export type FilterState = {
 };
 
 export const SearchQueryBuilder = forwardRef(function SearchQueryBuilder(
-  props: Props,
+  { filter, onFilterStateChange }: Props,
   ref,
 ) {
   const { register, handleSubmit, formState, setFocus } = useForm();
@@ -25,6 +25,9 @@ export const SearchQueryBuilder = forwardRef(function SearchQueryBuilder(
     focus: () => {
       setFocus("message");
     },
+    blur: () => {
+      document.getElementById("message-input")?.blur();
+    },
   }));
 
   return (
@@ -32,15 +35,16 @@ export const SearchQueryBuilder = forwardRef(function SearchQueryBuilder(
       <form
         className="flex flex-row items-center justify-between h-10 rounded-md border text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
         onSubmit={handleSubmit((data) => {
-          props.onFilterStateChange({
-            ...props.filter,
+          onFilterStateChange({
+            ...filter,
             message: data.message,
           });
         })}
       >
         <input
           {...register("message")}
-          placeholder="Filter"
+          id="message-input"
+          placeholder="Filter ('/')"
           className="px-3 py-2 flex-grow file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus:outline-none"
         />
         <Button
@@ -52,11 +56,11 @@ export const SearchQueryBuilder = forwardRef(function SearchQueryBuilder(
           <TextSearchIcon className="size-6" />
         </Button>
       </form>
-      {(props.filter.after || props.filter.before) && (
+      {(filter.after || filter.before) && (
         <Badge
           onClick={() => {
-            props.onFilterStateChange({
-              ...props.filter,
+            onFilterStateChange({
+              ...filter,
               after: undefined,
               before: undefined,
             });
@@ -64,8 +68,8 @@ export const SearchQueryBuilder = forwardRef(function SearchQueryBuilder(
           variant="outline"
           className="cursor-pointer text-xs text-slate-500 m-2"
         >
-          From {props.filter.after?.toISOString().split("T")[1] ?? "start"} to{" "}
-          {props.filter.before?.toISOString().split("T")[1] ?? "now"}
+          From {filter.after?.toISOString().split("T")[1] ?? "start"} to{" "}
+          {filter.before?.toISOString().split("T")[1] ?? "now"}
           <XIcon className="size-3 ml-1" />
         </Badge>
       )}

@@ -8,12 +8,12 @@ async function main() {
     console.log(`dev: dev`, {
       dev: "dev",
     });
-    await new Promise((resolve) => setTimeout(resolve, Math.random() * 4000));
+    await new Promise((resolve) => setTimeout(resolve, Math.random() * 30000));
   }
 }
 
-const data = fs.readFileSync("data.json", "utf8");
-console.log(`dev: data`, data);
+// const data = fs.readFileSync("data.json", "utf8");
+// console.log(`dev: data`, data);
 main().then(() => {
   console.log("done");
 });

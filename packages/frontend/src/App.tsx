@@ -6,8 +6,12 @@ import { Value } from "@sinclair/typebox/value";
 import { nanoid } from "nanoid";
 import {
   ChevronsDown,
+  ChevronsDownIcon,
   ChevronsUp,
+  ChevronsUpIcon,
+  ClipboardCopyIcon,
   LucideLoaderCircle,
+  MoreHorizontalIcon,
   PauseIcon,
   PlayIcon,
 } from "lucide-react";
@@ -87,12 +91,13 @@ export function App() {
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (
-        event.key === "/" &&
-        document.activeElement !== searchInputRef.current
-      ) {
+      if (event.key === "/") {
         event.preventDefault();
         searchInputRef.current?.focus();
+      }
+      if (event.key === "Escape") {
+        event.preventDefault();
+        searchInputRef.current?.blur();
       }
     };
     document.addEventListener("keydown", handleKeyDown);
@@ -208,7 +213,7 @@ function LogEntry({
 }: LogEntryProps) {
   const [collapsed, setCollapsed] = useState(false);
 
-  const renderLogMessage = (message: string) => {
+  function renderLogMessage(message: string) {
     if (collapsed) {
       const messageLines = message.split("\n");
       message = messageLines
@@ -228,30 +233,53 @@ function LogEntry({
           {part.content}
         </span>
       ));
-  };
+  }
+
+  function onToggleExpand() {
+    setCollapsed((prev) => !prev);
+  }
+
+  function copyToClipboard() {
+    navigator.clipboard.writeText(log.message);
+  }
 
   return (
-    <>
-      <DropdownMenu>
-        <DropdownMenuTrigger className="flex flex-row justify-start w-32 min-w-32 text-slate-400 font-mono text-sm tracking-tighter select-none focus-visible:outline-none hover:underline">
-          {new Date(log.timestamp).toISOString().split("T")[1]}
-        </DropdownMenuTrigger>
-        <DropdownMenuContent>
-          <DropdownMenuItem onClick={() => setCollapsed((prev) => !prev)}>
-            {collapsed ? "Expand" : "Collapse"}
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={onSelectToFilter}>
-            Show logs before
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={onSelectFromFilter}>
-            Show logs after
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-      <div className="whitespace-pre font-mono text-sm tracking-tight">
+    <div className="flex w-full group relative hover:bg-slate-50">
+      <div className="flex-shrink-0 w-32 text-slate-400 font-mono text-sm tracking-tighter select-none">
+        {new Date(log.timestamp).toISOString().split("T")[1]}
+      </div>
+      <div className="flex-grow whitespace-pre font-mono text-sm tracking-tight overflow-x-auto">
         {renderLogMessage(log.message)}
       </div>
-    </>
+      <div className="absolute top-0 right-0 opacity-0 group-hover:opacity-100 transition-opacity flex">
+        <Button variant="outline" size="sm" onClick={onToggleExpand}>
+          {collapsed ? (
+            <ChevronsDownIcon className="size-4" />
+          ) : (
+            <ChevronsUpIcon className="size-4" />
+          )}
+        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="sm" className="p-0">
+              <MoreHorizontalIcon className="size-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuItem onClick={onSelectToFilter}>
+              Show logs before
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={onSelectFromFilter}>
+              Show logs after
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={copyToClipboard}>
+              <ClipboardCopyIcon className="h-4 w-4 mr-2" />
+              Copy to clipboard
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+    </div>
   );
 }
 
