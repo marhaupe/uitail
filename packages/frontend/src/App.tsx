@@ -5,15 +5,19 @@ import { Static, Type } from "@sinclair/typebox";
 import { Value } from "@sinclair/typebox/value";
 import { nanoid } from "nanoid";
 import {
+  ChevronDownIcon,
+  ChevronRightIcon,
   ChevronsDown,
-  ChevronsDownIcon,
   ChevronsUp,
-  ChevronsUpIcon,
   ClipboardCopyIcon,
   LucideLoaderCircle,
+  Maximize2Icon,
+  Minimize2Icon,
+  MinusIcon,
   MoreHorizontalIcon,
   PauseIcon,
   PlayIcon,
+  PlusIcon,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { FilterState, SearchQueryBuilder } from "@/SearchBar";
@@ -26,6 +30,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { config } from "./config";
+import { cn } from "./lib/utils";
 
 const logSchema = Type.Object({
   timestamp: Type.String(),
@@ -43,6 +48,8 @@ export function App() {
   });
 
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const [selectedLogIndex, setSelectedLogIndex] = useState<number | null>(null);
+  const logRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   const [eventSource, setEventSource] = useState<EventSource>();
 
@@ -99,10 +106,32 @@ export function App() {
         event.preventDefault();
         searchInputRef.current?.blur();
       }
+      if (["j", "k", "ArrowUp", "ArrowDown"].includes(event.key)) {
+        const activeElement = document.activeElement;
+        const isInputFocused =
+          activeElement instanceof HTMLInputElement ||
+          activeElement instanceof HTMLTextAreaElement;
+
+        if (!isInputFocused) {
+          event.preventDefault();
+          setSelectedLogIndex((prevIndex) => {
+            if (prevIndex === null) return 0;
+            const newIndex =
+              event.key === "j" || event.key === "ArrowDown"
+                ? Math.min(prevIndex + 1, logs.length - 1)
+                : Math.max(prevIndex - 1, 0);
+            logRefs.current[newIndex]?.scrollIntoView({
+              behavior: "instant",
+              block: "nearest",
+            });
+            return newIndex;
+          });
+        }
+      }
     };
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, []);
+  }, [logs.length]);
 
   return (
     <div className="flex flex-1 flex-col min-h-screen bg-slate-50 p-6">
@@ -132,7 +161,7 @@ export function App() {
         </CardContent>
       </Card>
       <Card className="relative flex flex-col flex-1">
-        <div className="flex fixed bottom-4 right-4 flex-row gap-1">
+        <div className="flex fixed bottom-4 right-4 flex-row gap-1 z-50">
           <Button
             variant="outline"
             className="p-2"
@@ -160,34 +189,43 @@ export function App() {
         />
         {logs.length > 0 ? (
           <CardContent className="overflow-scroll">
-            {logs.map((log) => (
-              <div
-                className="flex flex-row text-sm border-none"
-                key={log.timestamp + log.message}
-              >
-                {log.message.trim().length > 0 ? (
-                  <LogEntry
-                    onSelectFromFilter={() => {
-                      setFilterState((prev) => ({
-                        ...prev,
-                        after: new Date(log.timestamp),
-                        before: undefined,
-                      }));
-                    }}
-                    onSelectToFilter={() => {
-                      setFilterState((prev) => ({
-                        ...prev,
-                        after: undefined,
-                        before: new Date(log.timestamp),
-                      }));
-                    }}
-                    log={log}
-                  />
-                ) : (
-                  <div className="h-3" />
-                )}
-              </div>
-            ))}
+            {logs.map((log, index) => {
+              const isSelected = index === selectedLogIndex;
+              return (
+                <div
+                  className={cn(
+                    "flex flex-row text-sm border-none",
+                    isSelected && "bg-slate-100",
+                  )}
+                  key={log.timestamp + log.message}
+                  ref={(el) => (logRefs.current[index] = el)}
+                >
+                  {log.message.trim().length > 0 ? (
+                    <LogEntry
+                      onSelect={() => setSelectedLogIndex(index)}
+                      isSelected={isSelected}
+                      onSelectFromFilter={() => {
+                        setFilterState((prev) => ({
+                          ...prev,
+                          after: new Date(log.timestamp),
+                          before: undefined,
+                        }));
+                      }}
+                      onSelectToFilter={() => {
+                        setFilterState((prev) => ({
+                          ...prev,
+                          after: undefined,
+                          before: new Date(log.timestamp),
+                        }));
+                      }}
+                      log={log}
+                    />
+                  ) : (
+                    <div className="h-3" />
+                  )}
+                </div>
+              );
+            })}
           </CardContent>
         ) : (
           <CardContent className="text-slate-500 flex flex-row gap-2 flex-1 justify-center items-center h-full">
@@ -202,16 +240,21 @@ export function App() {
 
 type LogEntryProps = {
   log: Log;
+  isSelected: boolean;
+  onSelect: () => void;
   onSelectFromFilter: () => void;
   onSelectToFilter: () => void;
 };
 
 function LogEntry({
   log,
+  onSelect,
+  isSelected,
   onSelectFromFilter,
   onSelectToFilter,
 }: LogEntryProps) {
   const [collapsed, setCollapsed] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
 
   function renderLogMessage(message: string) {
     if (collapsed) {
@@ -244,41 +287,57 @@ function LogEntry({
   }
 
   return (
-    <div className="flex w-full group relative hover:bg-slate-50">
+    <div
+      onClick={() => onSelect()}
+      className={cn(
+        "flex w-full group relative min-h-4",
+        isHovered && "bg-slate-50",
+        isSelected && "bg-slate-100",
+      )}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
       <div className="flex-shrink-0 w-32 text-slate-400 font-mono text-sm tracking-tighter select-none">
         {new Date(log.timestamp).toISOString().split("T")[1]}
       </div>
       <div className="flex-grow whitespace-pre font-mono text-sm tracking-tight overflow-x-auto">
         {renderLogMessage(log.message)}
       </div>
-      <div className="absolute top-0 right-0 opacity-0 group-hover:opacity-100 transition-opacity flex">
-        <Button variant="outline" size="sm" onClick={onToggleExpand}>
-          {collapsed ? (
-            <ChevronsDownIcon className="size-4" />
-          ) : (
-            <ChevronsUpIcon className="size-4" />
-          )}
-        </Button>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm" className="p-0">
-              <MoreHorizontalIcon className="size-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent>
-            <DropdownMenuItem onClick={onSelectToFilter}>
-              Show logs before
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={onSelectFromFilter}>
-              Show logs after
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={copyToClipboard}>
-              <ClipboardCopyIcon className="h-4 w-4 mr-2" />
-              Copy to clipboard
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
+      {(isHovered || isSelected) && (
+        <div className="absolute top-0 right-0 h-5 flex flex-row">
+          {log.message.split("\n").length > 1 ? (
+            <button
+              onClick={onToggleExpand}
+              className="p-0 m-0 size-5 border border-slate-300 flex items-center justify-center"
+            >
+              {collapsed ? (
+                <PlusIcon className="size-4" />
+              ) : (
+                <MinusIcon className="size-4" />
+              )}
+            </button>
+          ) : null}
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="p-0 m-0 size-5 border border-slate-300 flex items-center justify-center">
+                <MoreHorizontalIcon className="size-4" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem onClick={onSelectToFilter}>
+                Show logs before
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={onSelectFromFilter}>
+                Show logs after
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={copyToClipboard}>
+                Copy to clipboard
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      )}
     </div>
   );
 }
