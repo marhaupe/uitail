@@ -72,8 +72,10 @@ export function App() {
       url.searchParams.delete("before");
     }
     const newEventSource = new EventSource(url);
+    setSelectedLogIndex(null);
     setEventSource(newEventSource);
     return () => {
+      setSelectedLogIndex(null);
       setLogs([]);
       newEventSource.close();
     };
