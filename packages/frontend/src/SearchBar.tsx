@@ -31,7 +31,7 @@ export const SearchQueryBuilder = forwardRef(function SearchQueryBuilder(
   }));
 
   return (
-    <div className="sticky rounded-md top-0 p-2 bg-background">
+    <div className="sticky rounded-md top-0 p-2 bg-background z-50">
       <form
         className="flex flex-row items-center justify-between h-10 rounded-md border text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
         onSubmit={handleSubmit((data) => {
