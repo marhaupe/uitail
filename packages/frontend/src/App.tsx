@@ -5,14 +5,9 @@ import { Static, Type } from "@sinclair/typebox";
 import { Value } from "@sinclair/typebox/value";
 import { nanoid } from "nanoid";
 import {
-  ChevronDownIcon,
-  ChevronRightIcon,
   ChevronsDown,
   ChevronsUp,
-  ClipboardCopyIcon,
   LucideLoaderCircle,
-  Maximize2Icon,
-  Minimize2Icon,
   MinusIcon,
   MoreHorizontalIcon,
   PauseIcon,
