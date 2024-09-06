@@ -35,13 +35,20 @@ export function LogEntry({
   const [selectedMenuItem, setSelectedMenuItem] = useState<number>(0);
   const menuItemRefs = useRef<(HTMLDivElement | null)[]>([]);
 
+  const handleDropdownOpenChange = (isOpen: boolean) => {
+    setSelectedMenuItem(0);
+    onDropdownOpenChange(isOpen);
+  };
+
   useHotkeys(
-    "l,enter",
+    "l",
     () => {
-      if (isDropdownOpen && selectedMenuItem !== null) {
-        menuItemRefs.current[selectedMenuItem]?.click();
+      const menuItem = menuItemRefs.current[selectedMenuItem];
+      if (isDropdownOpen && menuItem) {
+        handleDropdownOpenChange(false);
+        menuItem.click();
       } else {
-        onDropdownOpenChange(true);
+        handleDropdownOpenChange(true);
       }
     },
     {
@@ -52,10 +59,16 @@ export function LogEntry({
   useHotkeys(
     "j,k,ArrowDown,ArrowUp",
     ({ key }) => {
-      setSelectedMenuItem((prev) => {
-        const next = key === "j" || key === "ArrowDown" ? prev + 1 : prev - 1;
-        return Math.max(0, Math.min(next, menuItemRefs.current.length - 1));
-      });
+      let nextSelectedMenuItem =
+        key === "j" || key === "ArrowDown"
+          ? selectedMenuItem + 1
+          : selectedMenuItem - 1;
+      nextSelectedMenuItem = Math.max(
+        0,
+        Math.min(nextSelectedMenuItem, menuItemRefs.current.length - 1)
+      );
+      setSelectedMenuItem(nextSelectedMenuItem);
+      menuItemRefs.current[nextSelectedMenuItem]?.focus();
     },
     {
       enabled: isDropdownOpen,
@@ -132,12 +145,15 @@ export function LogEntry({
           </button>
         ) : null}
 
-        <DropdownMenu open={isDropdownOpen} onOpenChange={onDropdownOpenChange}>
+        <DropdownMenu
+          open={isDropdownOpen}
+          onOpenChange={handleDropdownOpenChange}
+        >
           <DropdownMenuTrigger asChild>
             <button
               className="p-0 m-0 size-5 border border-slate-300 flex items-center justify-center"
               onPointerDown={() => {
-                onDropdownOpenChange(!isDropdownOpen);
+                handleDropdownOpenChange(!isDropdownOpen);
                 onSelect();
               }}
             >

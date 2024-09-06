@@ -1,6 +1,5 @@
 Features:
 
-- `l` or -> to interact with element
 - yy to yank
 - Search on typeahead
 - Clear session
