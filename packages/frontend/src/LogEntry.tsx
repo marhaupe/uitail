@@ -17,16 +17,13 @@ type LogEntryProps = {
   isSelected: boolean;
   onSelect: () => void;
   onDropdownOpenChange: (isOpen: boolean) => void;
-  onSelectFromFilter: () => void;
-  onSelectToFilter: () => void;
 };
 
 export function LogEntry({
   log,
   onSelect,
   isSelected,
-  onSelectFromFilter,
-  onSelectToFilter,
+
   onDropdownOpenChange,
   isDropdownOpen,
 }: LogEntryProps) {
@@ -163,22 +160,8 @@ export function LogEntry({
           <DropdownMenuContent>
             <DropdownMenuItem
               ref={(el) => (menuItemRefs.current[0] = el)}
-              onClick={onSelectToFilter}
-              className={cn(selectedMenuItem === 0 && "bg-slate-100")}
-            >
-              Show logs before
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              ref={(el) => (menuItemRefs.current[1] = el)}
-              onClick={onSelectFromFilter}
-              className={cn(selectedMenuItem === 1 && "bg-slate-100")}
-            >
-              Show logs after
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              ref={(el) => (menuItemRefs.current[2] = el)}
               onClick={copyToClipboard}
-              className={cn(selectedMenuItem === 2 && "bg-slate-100")}
+              className={cn(selectedMenuItem === 0 && "bg-slate-100")}
             >
               Copy message
             </DropdownMenuItem>

@@ -1,23 +1,15 @@
 import { useEffect, useState, useRef } from "react";
-
 import { Static, Type } from "@sinclair/typebox";
 import { Value } from "@sinclair/typebox/value";
 import { nanoid } from "nanoid";
-import {
-  ChevronsDown,
-  ChevronsUp,
-  LucideLoaderCircle,
-  PauseIcon,
-  PlayIcon,
-} from "lucide-react";
+import { ChevronsDown, ChevronsUp, PauseIcon, PlayIcon } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { FilterState, SearchQueryBuilder } from "@/SearchBar";
 import { Histogram } from "@/Histogram";
 import { Button } from "@/components/ui/button";
 import { config } from "./config";
-import { cn } from "./lib/utils";
-import { LogEntry } from "./LogEntry";
 import { useHotkeys } from "react-hotkeys-hook";
+import { LogList } from "./components/LogList";
 
 const logSchema = Type.Object({
   timestamp: Type.String(),
@@ -35,12 +27,6 @@ export function App() {
   });
 
   const searchInputRef = useRef<HTMLInputElement>(null);
-  const [selectedLogIndex, setSelectedLogIndex] = useState<number | null>(null);
-  const [openDropdownIndex, setOpenDropdownIndex] = useState<number | null>(
-    null
-  );
-  const logRefs = useRef<(HTMLDivElement | null)[]>([]);
-
   const [eventSource, setEventSource] = useState<EventSource>();
 
   useEffect(() => {
@@ -62,10 +48,8 @@ export function App() {
       url.searchParams.delete("before");
     }
     const newEventSource = new EventSource(url);
-    setSelectedLogIndex(null);
     setEventSource(newEventSource);
     return () => {
-      setSelectedLogIndex(null);
       setLogs([]);
       newEventSource.close();
     };
@@ -87,27 +71,6 @@ export function App() {
       }
     };
   }, [eventSource, isPaused]);
-
-  useHotkeys(
-    "j,k",
-    ({ key }) => {
-      setSelectedLogIndex((prevIndex) => {
-        if (prevIndex === null) return 0;
-        const newIndex =
-          key === "j" || key === "ArrowDown"
-            ? Math.min(prevIndex + 1, logs.length - 1)
-            : Math.max(prevIndex - 1, 0);
-        logRefs.current[newIndex]?.scrollIntoView({
-          behavior: "instant",
-          block: "nearest",
-        });
-        return newIndex;
-      });
-    },
-    {
-      enabled: openDropdownIndex === null,
-    }
-  );
 
   useHotkeys(
     "/",
@@ -183,61 +146,7 @@ export function App() {
           ref={searchInputRef}
           onFilterStateChange={(query) => setFilterState(query)}
         />
-        {logs.length > 0 ? (
-          <CardContent className="overflow-scroll">
-            {logs.map((log, index) => {
-              const isSelected = index === selectedLogIndex;
-              const isDropdownOpen = index === openDropdownIndex;
-              return (
-                <div
-                  className={cn(
-                    "flex flex-row text-sm border-none",
-                    isSelected && "bg-slate-100"
-                  )}
-                  key={log.timestamp + log.message}
-                  ref={(el) => (logRefs.current[index] = el)}
-                >
-                  {log.message.trim().length > 0 ? (
-                    <LogEntry
-                      onSelect={() => setSelectedLogIndex(index)}
-                      onDropdownOpenChange={(isOpen) => {
-                        if (isOpen) {
-                          setOpenDropdownIndex(index);
-                        } else {
-                          setOpenDropdownIndex(null);
-                        }
-                      }}
-                      isSelected={isSelected}
-                      isDropdownOpen={isDropdownOpen}
-                      onSelectFromFilter={() => {
-                        setFilterState((prev) => ({
-                          ...prev,
-                          after: new Date(log.timestamp),
-                          before: undefined,
-                        }));
-                      }}
-                      onSelectToFilter={() => {
-                        setFilterState((prev) => ({
-                          ...prev,
-                          after: undefined,
-                          before: new Date(log.timestamp),
-                        }));
-                      }}
-                      log={log}
-                    />
-                  ) : (
-                    <div className="h-3" />
-                  )}
-                </div>
-              );
-            })}
-          </CardContent>
-        ) : (
-          <CardContent className="text-slate-500 flex flex-row gap-2 flex-1 justify-center items-center h-full">
-            Waiting for logs
-            <LucideLoaderCircle className="animate-spin" />
-          </CardContent>
-        )}
+        <LogList logs={logs} />
       </Card>
     </div>
   );
