@@ -6,10 +6,11 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
-import { PlusIcon, MinusIcon, MoreHorizontalIcon } from "lucide-react";
+import { MoreHorizontalIcon } from "lucide-react";
 import { cn } from "./lib/utils";
 import anser from "anser";
 import { useHotkeys } from "react-hotkeys-hook";
+import { Button } from "@/components/ui/button";
 
 type LogEntryProps = {
   log: Log;
@@ -26,7 +27,6 @@ export function LogEntry({
   onDropdownOpenChange,
   isDropdownOpen,
 }: LogEntryProps) {
-  const [collapsed, setCollapsed] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [selectedMenuItem, setSelectedMenuItem] = useState<number>(0);
   const menuItemRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -71,17 +71,7 @@ export function LogEntry({
     }
   );
 
-  useHotkeys("space", () => setCollapsed((prev) => !prev), {
-    enabled: isSelected,
-  });
-
   function renderLogMessage(message: string) {
-    if (collapsed) {
-      const messageLines = message.split("\n");
-      message = messageLines
-        .slice(0, Math.min(messageLines.length, 3))
-        .join("\n");
-    }
     return anser
       .ansiToJson(message, { use_classes: true })
       .map((part: anser.AnserJsonEntry, index: number) => (
@@ -99,10 +89,6 @@ export function LogEntry({
       ));
   }
 
-  function onToggleExpand() {
-    setCollapsed((prev) => !prev);
-  }
-
   function copyToClipboard() {
     navigator.clipboard.writeText(log.message);
   }
@@ -111,8 +97,8 @@ export function LogEntry({
     <div
       onClick={onSelect}
       className={cn(
-        "flex w-full group relative h-full items-start text-stone-900 font-mono text-sm tracking-tight px-2",
-        (isHovered || isSelected) && "bg-stone-100",
+        "flex w-full group relative h-full items-start text-slate-900 font-mono text-sm tracking-tight px-2",
+        (isHovered || isSelected) && "bg-slate-100",
         isSelected && "border-l-4 border-primary"
       )}
       onMouseEnter={() => setIsHovered(true)}
@@ -130,33 +116,36 @@ export function LogEntry({
           !(isHovered || isSelected) && "invisible"
         )}
       >
-        {log.message.split("\n").length > 1 ? (
-          <button
+        {/* TODO: Add expand/collapse button that works with virtualizations */}
+        {/* {log.message.split("\n").length > 1 ? (
+          <Button
             onClick={onToggleExpand}
-            className="p-0 m-0 size-5 border border-slate-300 flex items-center justify-center"
+            variant="outline"
+            className="p-0 m-0 size-5"
           >
             {collapsed ? (
               <PlusIcon className="size-4" />
             ) : (
               <MinusIcon className="size-4" />
             )}
-          </button>
-        ) : null}
+          </Button>
+        ) : null} */}
 
         <DropdownMenu
           open={isDropdownOpen}
           onOpenChange={handleDropdownOpenChange}
         >
           <DropdownMenuTrigger asChild>
-            <button
-              className="p-0 m-0 size-5 border border-slate-300 flex items-center justify-center"
+            <Button
+              variant="outline"
+              className="p-0 m-0 size-5"
               onPointerDown={() => {
                 handleDropdownOpenChange(!isDropdownOpen);
                 onSelect();
               }}
             >
               <MoreHorizontalIcon className="size-4" />
-            </button>
+            </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
             <DropdownMenuItem
