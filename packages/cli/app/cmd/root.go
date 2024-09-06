@@ -139,10 +139,10 @@ func (r *Root) parseText() (*Log, error) {
 	for {
 		lines = append(lines, r.line)
 		for _, char := range r.line {
-			if char == '{' {
+			if char == '{' || char == '[' {
 				openingBraceCount++
 			}
-			if char == '}' {
+			if char == '}' || char == ']' {
 				closingBraceCount++
 			}
 		}
