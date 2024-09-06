@@ -79,6 +79,7 @@ export function App() {
     },
     {
       enableOnFormTags: true,
+      preventDefault: true,
     }
   );
 

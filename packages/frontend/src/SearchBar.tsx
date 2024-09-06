@@ -1,5 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { TextSearchIcon, XIcon } from "lucide-react";
 import { forwardRef, useImperativeHandle } from "react";
 import { useForm } from "react-hook-form";
@@ -17,7 +18,7 @@ export type FilterState = {
 
 export const SearchQueryBuilder = forwardRef(function SearchQueryBuilder(
   { filter, onFilterStateChange }: Props,
-  ref,
+  ref
 ) {
   const { register, handleSubmit, formState, setFocus } = useForm();
 
@@ -33,7 +34,7 @@ export const SearchQueryBuilder = forwardRef(function SearchQueryBuilder(
   return (
     <div className="sticky rounded-md top-0 p-2 bg-background z-50">
       <form
-        className="flex flex-row items-center justify-between h-10 rounded-md border text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+        className="flex flex-row items-center justify-between h-10 text-sm gap-2"
         onSubmit={handleSubmit((data) => {
           onFilterStateChange({
             ...filter,
@@ -41,18 +42,12 @@ export const SearchQueryBuilder = forwardRef(function SearchQueryBuilder(
           });
         })}
       >
-        <input
+        <Input
           {...register("message")}
           id="message-input"
           placeholder="Filter ('/')"
-          className="px-3 py-2 flex-grow file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus:outline-none"
         />
-        <Button
-          disabled={formState.isSubmitting}
-          className="p-2 rounded-l-none"
-          variant="outline"
-          type="submit"
-        >
+        <Button disabled={formState.isSubmitting} variant="ghost" type="submit">
           <TextSearchIcon className="size-6" />
         </Button>
       </form>
