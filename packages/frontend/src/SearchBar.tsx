@@ -1,9 +1,9 @@
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { TextSearchIcon, XIcon } from "lucide-react";
-import { forwardRef, useImperativeHandle } from "react";
+import { XIcon } from "lucide-react";
+import { forwardRef, useImperativeHandle, useEffect, useCallback } from "react";
 import { useForm } from "react-hook-form";
+import debounce from "lodash.debounce";
 
 type Props = {
   filter: FilterState;
@@ -20,7 +20,9 @@ export const SearchQueryBuilder = forwardRef(function SearchQueryBuilder(
   { filter, onFilterStateChange }: Props,
   ref
 ) {
-  const { register, handleSubmit, formState, setFocus } = useForm();
+  const { register, watch, setFocus } = useForm({
+    defaultValues: { message: filter.message },
+  });
 
   useImperativeHandle(ref, () => ({
     focus: () => {
@@ -31,26 +33,37 @@ export const SearchQueryBuilder = forwardRef(function SearchQueryBuilder(
     },
   }));
 
+  const debouncedFilterChange = useCallback(
+    debounce((value: string) => {
+      onFilterStateChange({
+        ...filter,
+        message: value,
+      });
+    }, 200),
+    [filter, onFilterStateChange]
+  );
+
+  useEffect(() => {
+    const subscription = watch((value, { name }) => {
+      if (name === "message") {
+        debouncedFilterChange(value.message as string);
+      }
+    });
+    return () => {
+      subscription.unsubscribe();
+      debouncedFilterChange.cancel();
+    };
+  }, [watch, debouncedFilterChange]);
+
   return (
     <div className="sticky rounded-md top-0 p-2 bg-background z-50">
-      <form
-        className="flex flex-row items-center justify-between h-10 text-sm gap-2"
-        onSubmit={handleSubmit((data) => {
-          onFilterStateChange({
-            ...filter,
-            message: data.message,
-          });
-        })}
-      >
+      <div className="flex flex-row items-center justify-between h-10 text-sm gap-2">
         <Input
           {...register("message")}
           id="message-input"
           placeholder="Filter ('/')"
         />
-        <Button disabled={formState.isSubmitting} variant="ghost" type="submit">
-          <TextSearchIcon className="size-6" />
-        </Button>
-      </form>
+      </div>
       {(filter.after || filter.before) && (
         <Badge
           onClick={() => {
