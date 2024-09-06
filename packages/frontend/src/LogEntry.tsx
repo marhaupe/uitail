@@ -99,14 +99,14 @@ export function LogEntry({
     <div
       onClick={onSelect}
       className={cn(
-        "flex w-full group relative h-full items-start text-slate-900 font-mono text-sm tracking-tight px-2",
+        "flex w-full group relative h-full items-start text-slate-900 font-mono text-sm tracking-tight px-4 gap-10",
         (isHovered || isSelected) && "bg-slate-100",
         isSelected && "border-l-4 border-primary"
       )}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <div className="flex-shrink-0 w-32">
+      <div className="flex-shrink-0">
         {new Date(log.timestamp).toISOString().split("T")[1]}
       </div>
       <div className="flex-grow whitespace-pre overflow-x-auto flex-col">

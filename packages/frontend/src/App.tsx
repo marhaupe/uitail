@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { Static, Type } from "@sinclair/typebox";
 import { Value } from "@sinclair/typebox/value";
 import { nanoid } from "nanoid";
-import { ChevronsDown, ChevronsUp, PauseIcon, PlayIcon } from "lucide-react";
+import { ChevronsDown, ChevronsUp } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { FilterState, SearchQueryBuilder } from "@/SearchBar";
 import { Histogram } from "@/Histogram";
@@ -20,7 +20,6 @@ const logsSchema = Type.Array(logSchema);
 export type Log = Static<typeof logSchema>;
 
 export function App() {
-  const [isPaused, setIsPaused] = useState(false);
   const [logs, setLogs] = useState<Log[]>([]);
   const [filterState, setFilterState] = useState<FilterState>({
     message: "",
@@ -60,9 +59,6 @@ export function App() {
       return;
     }
     eventSource.onmessage = (event: MessageEvent) => {
-      if (isPaused) {
-        return;
-      }
       try {
         const logs = Value.Decode(logsSchema, JSON.parse(event.data));
         setLogs((prevLogs) => [...prevLogs, ...logs]);
@@ -70,7 +66,7 @@ export function App() {
         console.error("error parsing log", error);
       }
     };
-  }, [eventSource, isPaused]);
+  }, [eventSource]);
 
   useHotkeys(
     "/",
@@ -98,17 +94,6 @@ export function App() {
       <div className="container p-6">
         <Card className="mb-4 relative">
           <CardContent className="p-2">
-            <Button
-              variant="secondary"
-              className="p-2 absolute top-2 right-2 z-40"
-              onClick={() => setIsPaused((prev) => !prev)}
-            >
-              {isPaused ? (
-                <PlayIcon className="h-6 w-6" />
-              ) : (
-                <PauseIcon className="h-6 w-6" />
-              )}
-            </Button>
             <Histogram
               logs={logs}
               onTimeframeSelect={(after, before) => {
