@@ -73,20 +73,24 @@ export const SearchQueryBuilder = forwardRef(function SearchQueryBuilder(
             {...register("message")}
             id="message-input"
             placeholder="Filter ('/')"
+            className="font-mono text-xs"
           />
           <div className="absolute top-0 right-0">
             <TooltipProvider>
               <Tooltip>
-                <TooltipTrigger>
-                  <Toggle
-                    aria-label="Match case"
-                    pressed={watch("caseInsensitive")}
-                    onPressedChange={(pressed) =>
-                      setValue("caseInsensitive", pressed)
-                    }
-                  >
-                    Aa
-                  </Toggle>
+                <TooltipTrigger asChild>
+                  {/* Hack to not have two nested buttons. Removing `asChild` does not fix it. */}
+                  <span>
+                    <Toggle
+                      aria-label="Match case"
+                      pressed={watch("caseInsensitive")}
+                      onPressedChange={(pressed) =>
+                        setValue("caseInsensitive", pressed)
+                      }
+                    >
+                      Aa
+                    </Toggle>
+                  </span>
                 </TooltipTrigger>
                 <TooltipContent>
                   <p>Match case</p>

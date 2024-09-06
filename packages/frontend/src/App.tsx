@@ -111,6 +111,7 @@ export function App() {
             ref={searchInputRef}
             onFilterStateChange={(query) => setFilterState(query)}
           />
+          <div className="h-2" />
           <LogList ref={logListRef} logs={logs} />
         </Card>
       </div>
