@@ -51,7 +51,7 @@ export function LogList({ logs }: LogListProps) {
   );
 
   useHotkeys(
-    "j,k",
+    "j,k,ArrowDown,ArrowUp",
     ({ key }) => {
       setSelectedLogIndex((prevIndex) => {
         if (prevIndex === null) return 0;
@@ -65,6 +65,7 @@ export function LogList({ logs }: LogListProps) {
     },
     {
       enabled: openDropdownIndex === null,
+      preventDefault: true,
     }
   );
 

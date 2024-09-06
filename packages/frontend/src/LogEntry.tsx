@@ -37,7 +37,7 @@ export function LogEntry({
   };
 
   useHotkeys(
-    "l",
+    "l,ArrowRight",
     () => {
       const menuItem = menuItemRefs.current[selectedMenuItem];
       if (isDropdownOpen && menuItem) {
@@ -134,7 +134,7 @@ export function LogEntry({
               <MoreHorizontalIcon className="size-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent>
+          <DropdownMenuContent onCloseAutoFocus={(e) => e.preventDefault()}>
             <DropdownMenuItem
               ref={(el) => (menuItemRefs.current[0] = el)}
               onClick={copyToClipboard}
