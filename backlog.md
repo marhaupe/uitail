@@ -1,10 +1,10 @@
 Features:
 
+- `l` or -> to interact with element
+- yy to yank
 - Search on typeahead
 - Clear session
-- yy to yank
 - Restart session (huge?)
-- `l` or -> to interact with element
   - the same for the modals that open as a consequence
 - case insensitive search
 - fix button only being clickable if log is selected
