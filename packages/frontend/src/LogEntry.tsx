@@ -49,7 +49,8 @@ export function LogEntry({
     },
     {
       enabled: isSelected,
-    }
+    },
+    [selectedMenuItem]
   );
 
   useHotkeys(
@@ -68,7 +69,8 @@ export function LogEntry({
     },
     {
       enabled: isDropdownOpen,
-    }
+    },
+    [selectedMenuItem]
   );
 
   function renderLogMessage(message: string) {
