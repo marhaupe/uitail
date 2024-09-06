@@ -13,7 +13,7 @@ import (
 
 	"github.com/iris-contrib/middleware/cors"
 	"github.com/kataras/iris/v12"
-	"github.com/marhaupe/uitail/internal/events"
+	"github.com/marhaupe/uitail/internal/logs"
 	"github.com/marhaupe/uitail/internal/static"
 	"github.com/spf13/cobra"
 )
@@ -44,7 +44,7 @@ func Execute() {
 }
 
 type Root struct {
-	eventService *events.EventService
+	logService   *logs.LogService
 	staticServer *static.Static
 	in           *bufio.Scanner
 	line         []byte
@@ -61,7 +61,7 @@ func New() *Root {
 	scanner.Split(bufio.ScanBytes)
 	return &Root{
 		in:           scanner,
-		eventService: events.New(),
+		logService:   logs.New(),
 		staticServer: static.New(),
 	}
 }
@@ -86,7 +86,9 @@ func (a *Root) Start() error {
 			// Maybe close event service here?
 		})
 
-		app.Any("/events", a.eventService.Handler())
+		app.Post("/restart", a.logService.RestartHandler())
+		app.Any("/events", a.logService.EventHandler())
+		app.Post("/clear", a.logService.ClearHandler())
 		app.Get("/{asset:path}", a.staticServer.Handler())
 
 		if err := app.Listen(fmt.Sprintf(":%d", port), config); err != nil {
@@ -120,7 +122,7 @@ func (r *Root) startReadLoop() error {
 				log.Printf("error parsing line: %s", err)
 				continue
 			}
-			err = r.eventService.Publish(events.Log{
+			err = r.logService.Publish(logs.Log{
 				Timestamp: l.Timestamp,
 				Message:   l.Message,
 			})

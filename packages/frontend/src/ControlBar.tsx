@@ -9,10 +9,16 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { Button } from "@/components/ui/button";
+import { Trash2, RefreshCw, ChevronsUp, ChevronsDown } from "lucide-react";
 
 type Props = {
   filter: FilterState;
   onFilterStateChange: (filter: FilterState) => void;
+  onClear: () => void;
+  onRestart: () => void;
+  onScrollToTop: () => void;
+  onScrollToBottom: () => void;
 };
 
 export type FilterState = {
@@ -20,8 +26,15 @@ export type FilterState = {
   caseInsensitive: boolean;
 };
 
-export const SearchQueryBuilder = forwardRef(function SearchQueryBuilder(
-  { filter, onFilterStateChange }: Props,
+export const ControlBar = forwardRef(function ControlBar(
+  {
+    filter,
+    onFilterStateChange,
+    onClear,
+    onRestart,
+    onScrollToTop,
+    onScrollToBottom,
+  }: Props,
   ref
 ) {
   const { register, watch, setFocus, setValue } = useForm({
@@ -68,7 +81,7 @@ export const SearchQueryBuilder = forwardRef(function SearchQueryBuilder(
   return (
     <div className="sticky rounded-md top-0 p-2 bg-background z-50">
       <div className="flex flex-row items-center justify-between h-10 text-sm gap-2">
-        <div className="relative w-full">
+        <div className="relative flex-grow">
           <Input
             {...register("message")}
             id="message-input"
@@ -79,7 +92,6 @@ export const SearchQueryBuilder = forwardRef(function SearchQueryBuilder(
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  {/* Hack to not have two nested buttons. Removing `asChild` does not fix it. */}
                   <span>
                     <Toggle
                       aria-label="Match case"
@@ -98,6 +110,20 @@ export const SearchQueryBuilder = forwardRef(function SearchQueryBuilder(
               </Tooltip>
             </TooltipProvider>
           </div>
+        </div>
+        <div className="flex items-center space-x-1">
+          <Button variant="ghost" size="sm" onClick={onScrollToTop}>
+            <ChevronsUp className="w-4 h-4" />
+          </Button>
+          <Button variant="ghost" size="sm" onClick={onScrollToBottom}>
+            <ChevronsDown className="w-4 h-4" />
+          </Button>
+          <Button variant="ghost" size="sm" onClick={onClear}>
+            <Trash2 className="w-4 h-4 mr-1" />
+          </Button>
+          <Button variant="ghost" size="sm" onClick={onRestart}>
+            <RefreshCw className="w-4 h-4 mr-1" />
+          </Button>
         </div>
       </div>
     </div>

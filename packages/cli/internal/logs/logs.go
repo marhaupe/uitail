@@ -1,4 +1,4 @@
-package events
+package logs
 
 import (
 	"encoding/json"
@@ -12,7 +12,7 @@ import (
 	"github.com/r3labs/sse/v2"
 )
 
-type EventService struct {
+type LogService struct {
 	logs      []Log
 	sseServer *sse.Server
 	sessions  sync.Map
@@ -29,8 +29,8 @@ type Log struct {
 	Message   string    `json:"message"`
 }
 
-func New() *EventService {
-	service := &EventService{
+func New() *LogService {
+	service := &LogService{
 		sseServer: sse.New(),
 		logs:      make([]Log, 0),
 		sessions:  sync.Map{},
@@ -39,13 +39,29 @@ func New() *EventService {
 	return service
 }
 
-func (s *EventService) Handler() iris.Handler {
+func (s *LogService) EventHandler() iris.Handler {
 	return func(ctx iris.Context) {
 		s.sseServer.ServeHTTP(ctx.ResponseWriter(), ctx.Request())
 	}
 }
 
-func (s *EventService) setup() {
+func (s *LogService) ClearHandler() iris.Handler {
+	return func(ctx iris.Context) {
+		s.logs = make([]Log, 0)
+		ctx.StatusCode(iris.StatusOK)
+		ctx.WriteString("OK")
+	}
+}
+
+func (s *LogService) RestartHandler() iris.Handler {
+	return func(ctx iris.Context) {
+		// TODO: Implement
+		ctx.StatusCode(iris.StatusOK)
+		ctx.WriteString("OK")
+	}
+}
+
+func (s *LogService) setup() {
 	s.sseServer.AutoReplay = false
 	s.sseServer.AutoStream = true
 	s.sseServer.OnSubscribe = func(streamID string, sub *sse.Subscriber) {
@@ -56,7 +72,7 @@ func (s *EventService) setup() {
 			filter:          filter,
 			caseInsensitive: caseInsensitive,
 		})
-		err := s.Replay(streamID)
+		err := s.replay(streamID)
 		if err != nil {
 			log.Printf("error replaying logs for new stream: %s\n", err)
 		}
@@ -66,7 +82,7 @@ func (s *EventService) setup() {
 	}
 }
 
-func (s *EventService) Replay(token string) error {
+func (s *LogService) replay(token string) error {
 	if !s.sseServer.StreamExists(token) {
 		return fmt.Errorf("stream does not exist")
 	}
@@ -94,7 +110,7 @@ func (s *EventService) Replay(token string) error {
 	return nil
 }
 
-func (s *EventService) Publish(l Log) error {
+func (s *LogService) Publish(l Log) error {
 	s.logs = append(s.logs, l)
 	data, err := json.Marshal([]Log{l})
 	if err != nil {

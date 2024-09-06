@@ -2,13 +2,12 @@ import { useEffect, useState, useRef } from "react";
 import { Static, Type } from "@sinclair/typebox";
 import { Value } from "@sinclair/typebox/value";
 import { nanoid } from "nanoid";
-import { ChevronsDown, ChevronsUp } from "lucide-react";
 import { Card } from "@/components/ui/card";
-import { FilterState, SearchQueryBuilder } from "@/SearchBar";
-import { Button } from "@/components/ui/button";
+import { FilterState, ControlBar } from "@/ControlBar";
 import { config } from "./config";
 import { useHotkeys } from "react-hotkeys-hook";
 import { LogList, LogListRef } from "./components/LogList";
+import { toast } from "sonner";
 
 const logSchema = Type.Object({
   timestamp: Type.String(),
@@ -30,8 +29,42 @@ export function App() {
 
   const logListRef = useRef<LogListRef>(null);
 
+  async function handleClear() {
+    try {
+      const response = await fetch(
+        `${config.backendUrl}${config.routes.clear}`,
+        {
+          method: "POST",
+        }
+      );
+      if (response.ok) {
+        setLogs([]);
+        toast.success("Logs cleared");
+      }
+    } catch (error) {
+      console.error("Error clearing logs:", error);
+    }
+  }
+
+  async function handleRestart() {
+    try {
+      const response = await fetch(
+        `${config.backendUrl}${config.routes.restart}`,
+        {
+          method: "POST",
+        }
+      );
+      if (response.ok) {
+        setLogs([]);
+        toast.success("Agent restarted");
+      }
+    } catch (error) {
+      console.error("Error restarting agent:", error);
+    }
+  }
+
   useEffect(() => {
-    const url = new URL(config.agentUrl);
+    const url = new URL(config.backendUrl + config.routes.events);
     url.searchParams.set("stream", nanoid());
     if (filterState.message.trim().length > 0) {
       url.searchParams.set("filter", filterState.message);
@@ -65,6 +98,10 @@ export function App() {
     };
   }, [eventSource]);
 
+  useHotkeys("mod+k", () => {
+    handleClear();
+  });
+
   useHotkeys(
     "/",
     () => {
@@ -90,26 +127,14 @@ export function App() {
     <div className="flex flex-1 flex-col min-h-screen bg-slate-50">
       <div className="container p-6">
         <Card className="relative flex flex-col flex-1">
-          <div className="flex fixed bottom-4 right-4 flex-row gap-1 z-50">
-            <Button
-              variant="outline"
-              className="p-2"
-              onClick={() => logListRef.current?.scrollToTop()}
-            >
-              <ChevronsUp />
-            </Button>
-            <Button
-              variant="outline"
-              className="p-2"
-              onClick={() => logListRef.current?.scrollToBottom()}
-            >
-              <ChevronsDown />
-            </Button>
-          </div>
-          <SearchQueryBuilder
+          <ControlBar
             filter={filterState}
             ref={searchInputRef}
             onFilterStateChange={(query) => setFilterState(query)}
+            onClear={handleClear}
+            onRestart={handleRestart}
+            onScrollToTop={() => logListRef.current?.scrollToTop()}
+            onScrollToBottom={() => logListRef.current?.scrollToBottom()}
           />
           <div className="h-2" />
           <LogList ref={logListRef} logs={logs} />
