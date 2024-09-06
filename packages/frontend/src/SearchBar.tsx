@@ -68,29 +68,33 @@ export const SearchQueryBuilder = forwardRef(function SearchQueryBuilder(
   return (
     <div className="sticky rounded-md top-0 p-2 bg-background z-50">
       <div className="flex flex-row items-center justify-between h-10 text-sm gap-2">
-        <Input
-          {...register("message")}
-          id="message-input"
-          placeholder="Filter ('/')"
-        />
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger>
-              <Toggle
-                aria-label="Match case"
-                pressed={watch("caseInsensitive")}
-                onPressedChange={(pressed) =>
-                  setValue("caseInsensitive", pressed)
-                }
-              >
-                Aa
-              </Toggle>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Match case</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+        <div className="relative w-full">
+          <Input
+            {...register("message")}
+            id="message-input"
+            placeholder="Filter ('/')"
+          />
+          <div className="absolute top-0 right-0">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>
+                  <Toggle
+                    aria-label="Match case"
+                    pressed={watch("caseInsensitive")}
+                    onPressedChange={(pressed) =>
+                      setValue("caseInsensitive", pressed)
+                    }
+                  >
+                    Aa
+                  </Toggle>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Match case</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+        </div>
       </div>
     </div>
   );
