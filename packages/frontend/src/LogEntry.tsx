@@ -31,10 +31,10 @@ export function LogEntry({
   const [selectedMenuItem, setSelectedMenuItem] = useState<number>(0);
   const menuItemRefs = useRef<(HTMLDivElement | null)[]>([]);
 
-  const handleDropdownOpenChange = (isOpen: boolean) => {
+  function handleDropdownOpenChange(isOpen: boolean) {
     setSelectedMenuItem(0);
     onDropdownOpenChange(isOpen);
-  };
+  }
 
   useHotkeys(
     "l,ArrowRight",

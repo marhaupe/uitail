@@ -1,10 +1,23 @@
-import { useRef, useState, useEffect, useMemo, memo } from "react";
+import React, {
+  useRef,
+  useState,
+  useEffect,
+  useMemo,
+  memo,
+  forwardRef,
+  useImperativeHandle,
+} from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { LogEntry } from "../LogEntry";
 import { Log } from "../App";
 import { CardContent } from "./ui/card";
 import { LucideLoaderCircle } from "lucide-react";
 import { VariableSizeList as List, areEqual } from "react-window";
+
+export interface LogListRef {
+  scrollToTop: () => void;
+  scrollToBottom: () => void;
+}
 
 interface LogListProps {
   logs: Log[];
@@ -13,7 +26,7 @@ interface LogListProps {
 const REM_IN_PX = 4;
 const LINE_HEIGHT = 5 * REM_IN_PX;
 
-export function LogList({ logs }: LogListProps) {
+export const LogList = forwardRef<LogListRef, LogListProps>(({ logs }, ref) => {
   const [selectedLogIndex, setSelectedLogIndex] = useState<number | null>(null);
   const [openDropdownIndex, setOpenDropdownIndex] = useState<number | null>(
     null
@@ -35,19 +48,24 @@ export function LogList({ logs }: LogListProps) {
     return () => window.removeEventListener("resize", updateHeight);
   }, []);
 
-  const getItemSize = (index: number) => {
+  function getItemSize(index: number) {
     const lineCount = logs[index].message.split("\n").length;
     return lineCount * LINE_HEIGHT;
-  };
+  }
+
+  function scrollToIndex(index: number) {
+    listRef.current?.scrollToItem(index, "start");
+    setSelectedLogIndex(index);
+  }
 
   useHotkeys(
     "g,shift+g",
     ({ key }) => {
       const newIndex = key === "g" ? 0 : logs.length - 1;
-      listRef.current?.scrollToItem(newIndex, "start");
-      setSelectedLogIndex(newIndex);
+      scrollToIndex(newIndex);
     },
-    { enabled: openDropdownIndex === null }
+    { enabled: openDropdownIndex === null },
+    [logs.length]
   );
 
   useHotkeys(
@@ -86,6 +104,19 @@ export function LogList({ logs }: LogListProps) {
     [logs, selectedLogIndex, openDropdownIndex]
   );
 
+  useImperativeHandle(
+    ref,
+    () => ({
+      scrollToTop: () => {
+        scrollToIndex(0);
+      },
+      scrollToBottom: () => {
+        scrollToIndex(logs.length - 1);
+      },
+    }),
+    [logs.length]
+  );
+
   return (
     <div ref={containerRef} style={{ height: "100%" }}>
       {logs.length > 0 ? (
@@ -107,7 +138,7 @@ export function LogList({ logs }: LogListProps) {
       )}
     </div>
   );
-}
+});
 
 interface RowData {
   logs: Log[];

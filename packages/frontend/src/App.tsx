@@ -9,7 +9,7 @@ import { Histogram } from "@/Histogram";
 import { Button } from "@/components/ui/button";
 import { config } from "./config";
 import { useHotkeys } from "react-hotkeys-hook";
-import { LogList } from "./components/LogList";
+import { LogList, LogListRef } from "./components/LogList";
 
 const logSchema = Type.Object({
   timestamp: Type.String(),
@@ -28,6 +28,8 @@ export function App() {
 
   const searchInputRef = useRef<HTMLInputElement>(null);
   const [eventSource, setEventSource] = useState<EventSource>();
+
+  const logListRef = useRef<LogListRef>(null);
 
   useEffect(() => {
     const url = new URL(config.agentUrl);
@@ -107,19 +109,14 @@ export function App() {
             <Button
               variant="outline"
               className="p-2"
-              onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+              onClick={() => logListRef.current?.scrollToTop()}
             >
               <ChevronsUp />
             </Button>
             <Button
               variant="outline"
               className="p-2"
-              onClick={() =>
-                window.scrollTo({
-                  top: document.body.scrollHeight,
-                  behavior: "smooth",
-                })
-              }
+              onClick={() => logListRef.current?.scrollToBottom()}
             >
               <ChevronsDown />
             </Button>
@@ -129,7 +126,7 @@ export function App() {
             ref={searchInputRef}
             onFilterStateChange={(query) => setFilterState(query)}
           />
-          <LogList logs={logs} />
+          <LogList ref={logListRef} logs={logs} />
         </Card>
       </div>
     </div>
