@@ -41,6 +41,16 @@ export function LogList({ logs }: LogListProps) {
   };
 
   useHotkeys(
+    "g,shift+g",
+    ({ key }) => {
+      const newIndex = key === "g" ? 0 : logs.length - 1;
+      listRef.current?.scrollToItem(newIndex, "start");
+      setSelectedLogIndex(newIndex);
+    },
+    { enabled: openDropdownIndex === null }
+  );
+
+  useHotkeys(
     "j,k",
     ({ key }) => {
       setSelectedLogIndex((prevIndex) => {

@@ -1,4 +1,4 @@
-dev: install
+dev: 
 	node testlogger.js 2>&1 | go run main.go
 
 ui:

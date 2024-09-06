@@ -93,61 +93,63 @@ export function App() {
   );
 
   return (
-    <div className="flex flex-1 flex-col min-h-screen bg-slate-50 p-6">
-      <Card className="mb-4 relative">
-        <CardContent className="p-2">
-          <Button
-            variant="ghost"
-            className="p-2 absolute top-2 right-2 z-40"
-            onClick={() => setIsPaused((prev) => !prev)}
-          >
-            {isPaused ? (
-              <PlayIcon className="h-6 w-6" />
-            ) : (
-              <PauseIcon className="h-6 w-6" />
-            )}
-          </Button>
-          <Histogram
-            logs={logs}
-            onTimeframeSelect={(after, before) => {
-              setFilterState((prev) => ({
-                ...prev,
-                after,
-                before,
-              }));
-            }}
+    <div className="flex flex-1 flex-col min-h-screen bg-slate-50">
+      <div className="container p-6">
+        <Card className="mb-4 relative">
+          <CardContent className="p-2">
+            <Button
+              variant="ghost"
+              className="p-2 absolute top-2 right-2 z-40"
+              onClick={() => setIsPaused((prev) => !prev)}
+            >
+              {isPaused ? (
+                <PlayIcon className="h-6 w-6" />
+              ) : (
+                <PauseIcon className="h-6 w-6" />
+              )}
+            </Button>
+            <Histogram
+              logs={logs}
+              onTimeframeSelect={(after, before) => {
+                setFilterState((prev) => ({
+                  ...prev,
+                  after,
+                  before,
+                }));
+              }}
+            />
+          </CardContent>
+        </Card>
+        <Card className="relative flex flex-col flex-1">
+          <div className="flex fixed bottom-4 right-4 flex-row gap-1 z-50">
+            <Button
+              variant="outline"
+              className="p-2"
+              onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+            >
+              <ChevronsUp />
+            </Button>
+            <Button
+              variant="outline"
+              className="p-2"
+              onClick={() =>
+                window.scrollTo({
+                  top: document.body.scrollHeight,
+                  behavior: "smooth",
+                })
+              }
+            >
+              <ChevronsDown />
+            </Button>
+          </div>
+          <SearchQueryBuilder
+            filter={filterState}
+            ref={searchInputRef}
+            onFilterStateChange={(query) => setFilterState(query)}
           />
-        </CardContent>
-      </Card>
-      <Card className="relative flex flex-col flex-1">
-        <div className="flex fixed bottom-4 right-4 flex-row gap-1 z-50">
-          <Button
-            variant="outline"
-            className="p-2"
-            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-          >
-            <ChevronsUp />
-          </Button>
-          <Button
-            variant="outline"
-            className="p-2"
-            onClick={() =>
-              window.scrollTo({
-                top: document.body.scrollHeight,
-                behavior: "smooth",
-              })
-            }
-          >
-            <ChevronsDown />
-          </Button>
-        </div>
-        <SearchQueryBuilder
-          filter={filterState}
-          ref={searchInputRef}
-          onFilterStateChange={(query) => setFilterState(query)}
-        />
-        <LogList logs={logs} />
-      </Card>
+          <LogList logs={logs} />
+        </Card>
+      </div>
     </div>
   );
 }

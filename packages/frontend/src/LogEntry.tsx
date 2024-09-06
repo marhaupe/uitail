@@ -23,7 +23,6 @@ export function LogEntry({
   log,
   onSelect,
   isSelected,
-
   onDropdownOpenChange,
   isDropdownOpen,
 }: LogEntryProps) {
@@ -112,17 +111,17 @@ export function LogEntry({
     <div
       onClick={onSelect}
       className={cn(
-        "flex w-full group relative h-full items-center px-4",
-        isHovered && "bg-slate-50",
-        isSelected && "bg-slate-100"
+        "flex w-full group relative h-full items-center",
+        (isHovered || isSelected) && "bg-stone-100",
+        isSelected && "border-l-4 border-primary pl-1"
       )}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <div className="flex-shrink-0 w-32 text-slate-400 font-mono text-sm tracking-tighter select-none">
+      <div className="flex-shrink-0 w-32 text-stone-900 font-mono text-sm tracking-tighter select-none">
         {new Date(log.timestamp).toISOString().split("T")[1]}
       </div>
-      <div className="flex-grow whitespace-pre font-mono text-sm tracking-tight overflow-x-auto flex-col">
+      <div className="flex-grow whitespace-pre font-mono font-light text-sm tracking-tight overflow-x-auto flex-col">
         {renderLogMessage(log.message)}
       </div>
       <div
