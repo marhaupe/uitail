@@ -4,9 +4,11 @@ import (
 	"bufio"
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"os"
+	"os/exec"
 	"os/signal"
 	"syscall"
 	"time"
@@ -21,10 +23,15 @@ import (
 var rootCmd = &cobra.Command{
 	Use:     "uitail",
 	Short:   "uitail is a tail-like tool with a beautiful UI",
-	Example: "ping google.com 2>&1 | uitail",
+	Example: "uitail \"ping google.com\"",
+	Args:    cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		root := New()
-		root.Start()
+		root := New(args[0])
+		err := root.Start()
+		if err != nil {
+			fmt.Println("error starting uitail", err)
+			os.Exit(1)
+		}
 	},
 }
 
@@ -48,6 +55,8 @@ type Root struct {
 	staticServer *static.Static
 	in           *bufio.Scanner
 	line         []byte
+	command      string
+	cmd          *exec.Cmd
 }
 
 type Log struct {
@@ -55,18 +64,53 @@ type Log struct {
 	Message   string    `json:"message"`
 }
 
-func New() *Root {
-	in := os.Stdin
-	scanner := bufio.NewScanner(in)
-	scanner.Split(bufio.ScanBytes)
+func New(command string) *Root {
 	return &Root{
-		in:           scanner,
 		logService:   logs.New(),
 		staticServer: static.New(),
+		command:      command,
 	}
 }
 
+func (a *Root) startCommand() error {
+	if a.cmd != nil {
+		return errors.New("command already started")
+	}
+	a.cmd = exec.Command("bash", "-c", a.command)
+	stdout, err := a.cmd.StdoutPipe()
+	a.cmd.Stderr = a.cmd.Stdout
+	if err != nil {
+		return err
+	}
+	scanner := bufio.NewScanner(stdout)
+	scanner.Split(bufio.ScanBytes)
+	a.in = scanner
+	go func() {
+		if err := a.cmd.Run(); err != nil {
+			log.Printf("error running command: %s", err)
+		}
+	}()
+	return nil
+}
+
+func (a *Root) stopCommand() error {
+	if a.cmd == nil {
+		return errors.New("command not started")
+	}
+
+	err := a.cmd.Process.Kill()
+	if err != nil {
+		return err
+	}
+	a.cmd = nil
+	return nil
+}
+
 func (a *Root) Start() error {
+	err := a.startCommand()
+	if err != nil {
+		return err
+	}
 	go func() {
 		config := iris.WithConfiguration(iris.Configuration{
 			DisableStartupLog: true,
@@ -86,7 +130,22 @@ func (a *Root) Start() error {
 			// Maybe close event service here?
 		})
 
-		app.Post("/restart", a.logService.RestartHandler())
+		app.Post("/restart", func(ctx iris.Context) {
+			err := a.stopCommand()
+			if err != nil {
+				ctx.StatusCode(iris.StatusInternalServerError)
+				ctx.WriteString(fmt.Sprintf("error stopping command: %s", err))
+				return
+			}
+			err = a.startCommand()
+			if err != nil {
+				ctx.StatusCode(iris.StatusInternalServerError)
+				ctx.WriteString(fmt.Sprintf("error starting command: %s", err))
+				return
+			}
+			ctx.StatusCode(iris.StatusOK)
+			ctx.WriteString("OK")
+		})
 		app.Any("/events", a.logService.EventHandler())
 		app.Post("/clear", a.logService.ClearHandler())
 		app.Get("/{asset:path}", a.staticServer.Handler())

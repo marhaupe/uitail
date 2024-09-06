@@ -55,7 +55,6 @@ export function App() {
         }
       );
       if (response.ok) {
-        setLogs([]);
         toast.success("Agent restarted");
       }
     } catch (error) {

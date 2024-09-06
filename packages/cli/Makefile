@@ -1,5 +1,5 @@
 dev: 
-	node testlogger.js 2>&1 | go run main.go
+	go run main.go "node testlogger.js"
 
 ui:
 	rm -rf internal/static/dist
