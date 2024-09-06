@@ -3,9 +3,8 @@ import { Static, Type } from "@sinclair/typebox";
 import { Value } from "@sinclair/typebox/value";
 import { nanoid } from "nanoid";
 import { ChevronsDown, ChevronsUp } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { FilterState, SearchQueryBuilder } from "@/SearchBar";
-import { Histogram } from "@/Histogram";
 import { Button } from "@/components/ui/button";
 import { config } from "./config";
 import { useHotkeys } from "react-hotkeys-hook";
@@ -90,20 +89,6 @@ export function App() {
   return (
     <div className="flex flex-1 flex-col min-h-screen bg-slate-50">
       <div className="container p-6">
-        <Card className="mb-4 relative">
-          <CardContent className="p-2">
-            <Histogram
-              logs={logs}
-              onTimeframeSelect={(after, before) => {
-                setFilterState((prev) => ({
-                  ...prev,
-                  after,
-                  before,
-                }));
-              }}
-            />
-          </CardContent>
-        </Card>
         <Card className="relative flex flex-col flex-1">
           <div className="flex fixed bottom-4 right-4 flex-row gap-1 z-50">
             <Button
