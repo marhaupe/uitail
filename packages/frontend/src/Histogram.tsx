@@ -21,6 +21,12 @@ type Bucket = {
 
 const bucketCount = 100;
 
+const chartConfig: ChartConfig = {
+  count: {
+    color: "hsl(var(--primary))",
+  },
+};
+
 export function Histogram({ logs, onTimeframeSelect }: HistogramProps) {
   const [buckets, setBuckets] = useState<Bucket[]>([]);
 
@@ -31,14 +37,14 @@ export function Histogram({ logs, onTimeframeSelect }: HistogramProps) {
           logs.map((log) => ({
             startTime: new Date(log.timestamp),
             count: 1,
-          })),
+          }))
         );
         return;
       }
       // should set a different unit depending on the timeframe
       const startDate = new Date(logs[0].timestamp).setMilliseconds(0);
       const endDate = new Date(logs[logs.length - 1].timestamp).setMilliseconds(
-        0,
+        0
       );
       const timeDiff = endDate - startDate;
       // Maybe we can set the interval to either 100 or logs.length
@@ -60,18 +66,18 @@ export function Histogram({ logs, onTimeframeSelect }: HistogramProps) {
       }
       setBuckets(buckets);
     }, 2500),
-    [setBuckets],
+    [setBuckets]
   );
 
   useEffect(() => throttledSetBuckets(logs), [logs, throttledSetBuckets]);
 
-  const chartConfig = {} satisfies ChartConfig;
   const maxBucketCount = Math.max(...buckets.map((b) => b.count));
 
   return (
     <div className="flex flex-row justify-center">
       <ChartContainer
         className="aspect-auto h-[125px] w-full"
+        color="red"
         config={chartConfig}
       >
         <BarChart
@@ -96,10 +102,10 @@ export function Histogram({ logs, onTimeframeSelect }: HistogramProps) {
               maxBucketCount > 500
                 ? 500
                 : maxBucketCount > 250
-                  ? 250
-                  : maxBucketCount > 100
-                    ? 100
-                    : 50,
+                ? 250
+                : maxBucketCount > 100
+                ? 100
+                : 50,
             ]}
           />
 
@@ -107,7 +113,11 @@ export function Histogram({ logs, onTimeframeSelect }: HistogramProps) {
             labelFormatter={(time) => format(new Date(time), "HH:mm:ss:SS")}
             formatter={(value) => [`${value}`, "Count"]}
           />
-          <Bar isAnimationActive={false} dataKey="count" />
+          <Bar
+            isAnimationActive={false}
+            dataKey="count"
+            fill="hsl(var(--primary))"
+          />
         </BarChart>
       </ChartContainer>
     </div>

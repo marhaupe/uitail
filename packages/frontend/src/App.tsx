@@ -98,7 +98,7 @@ export function App() {
         <Card className="mb-4 relative">
           <CardContent className="p-2">
             <Button
-              variant="ghost"
+              variant="secondary"
               className="p-2 absolute top-2 right-2 z-40"
               onClick={() => setIsPaused((prev) => !prev)}
             >

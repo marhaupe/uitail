@@ -113,7 +113,7 @@ export function LogEntry({
       className={cn(
         "flex w-full group relative h-full items-center",
         (isHovered || isSelected) && "bg-stone-100",
-        isSelected && "border-l-4 border-primary pl-1"
+        isSelected && "border-l-4 border-primary pl-2"
       )}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
