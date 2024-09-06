@@ -49,7 +49,7 @@ export function LogList({ logs }: LogListProps) {
           key === "j" || key === "ArrowDown"
             ? Math.min(prevIndex + 1, logs.length - 1)
             : Math.max(prevIndex - 1, 0);
-        listRef.current?.scrollToItem(newIndex, "smart");
+        listRef.current?.scrollToItem(newIndex, "start");
         return newIndex;
       });
     },
