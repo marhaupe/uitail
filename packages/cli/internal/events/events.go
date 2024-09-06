@@ -19,8 +19,9 @@ type EventService struct {
 }
 
 type Session struct {
-	streamID string
-	filter   string
+	streamID        string
+	filter          string
+	caseInsensitive bool
 }
 
 type Log struct {
@@ -49,9 +50,11 @@ func (s *EventService) setup() {
 	s.sseServer.AutoStream = true
 	s.sseServer.OnSubscribe = func(streamID string, sub *sse.Subscriber) {
 		filter := sub.URL.Query().Get("filter")
+		caseInsensitive := sub.URL.Query().Get("caseInsensitive") == "true"
 		s.sessions.Store(streamID, Session{
-			streamID: streamID,
-			filter:   filter,
+			streamID:        streamID,
+			filter:          filter,
+			caseInsensitive: caseInsensitive,
 		})
 		err := s.Replay(streamID)
 		if err != nil {
@@ -112,8 +115,11 @@ func (s *EventService) Publish(l Log) error {
 }
 
 func matchFilter(session Session, l Log) bool {
-	if len(session.filter) > 0 && !strings.Contains(l.Message, session.filter) {
-		return false
+	if len(session.filter) > 0 {
+		if session.caseInsensitive {
+			return strings.Contains(strings.ToLower(l.Message), strings.ToLower(session.filter))
+		}
+		return strings.Contains(l.Message, session.filter)
 	}
 	return true
 }

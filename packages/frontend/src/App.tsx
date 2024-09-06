@@ -23,6 +23,7 @@ export function App() {
   const [logs, setLogs] = useState<Log[]>([]);
   const [filterState, setFilterState] = useState<FilterState>({
     message: "",
+    caseInsensitive: false,
   });
 
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -33,18 +34,13 @@ export function App() {
     url.searchParams.set("stream", nanoid());
     if (filterState.message.trim().length > 0) {
       url.searchParams.set("filter", filterState.message);
+      url.searchParams.set(
+        "caseInsensitive",
+        filterState.caseInsensitive.toString()
+      );
     } else {
       url.searchParams.delete("filter");
-    }
-    if (filterState.after) {
-      url.searchParams.set("after", filterState.after.toISOString());
-    } else {
-      url.searchParams.delete("after");
-    }
-    if (filterState.before) {
-      url.searchParams.set("before", filterState.before.toISOString());
-    } else {
-      url.searchParams.delete("before");
+      url.searchParams.delete("caseInsensitive");
     }
     const newEventSource = new EventSource(url);
     setEventSource(newEventSource);
