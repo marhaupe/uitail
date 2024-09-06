@@ -1,10 +1,10 @@
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useMemo, memo } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { LogEntry } from "../LogEntry";
 import { Log } from "../App";
 import { CardContent } from "./ui/card";
 import { LucideLoaderCircle } from "lucide-react";
-import { VariableSizeList as List } from "react-window";
+import { VariableSizeList as List, areEqual } from "react-window";
 
 interface LogListProps {
   logs: Log[];
@@ -68,35 +68,22 @@ export function LogList({ logs }: LogListProps) {
     }
   );
 
-  const Row = ({
-    index,
-    style,
-  }: {
-    index: number;
-    style: React.CSSProperties;
-  }) => {
-    const log = logs[index];
-    const isSelected = index === selectedLogIndex;
-    const isDropdownOpen = index === openDropdownIndex;
-
-    return (
-      <div style={style}>
-        <LogEntry
-          log={log}
-          isSelected={isSelected}
-          isDropdownOpen={isDropdownOpen}
-          onSelect={() => setSelectedLogIndex(index)}
-          onDropdownOpenChange={(isOpen) => {
-            if (isOpen) {
-              setOpenDropdownIndex(index);
-            } else {
-              setOpenDropdownIndex(null);
-            }
-          }}
-        />
-      </div>
-    );
-  };
+  const itemData = useMemo(
+    (): RowData => ({
+      logs,
+      selectedLogIndex,
+      openDropdownIndex,
+      onSelect: (index: number) => setSelectedLogIndex(index),
+      onDropdownOpenChange: (isOpen: boolean, index: number) => {
+        if (isOpen) {
+          setOpenDropdownIndex(index);
+        } else {
+          setOpenDropdownIndex(null);
+        }
+      },
+    }),
+    [logs, selectedLogIndex, openDropdownIndex]
+  );
 
   return (
     <div ref={containerRef} style={{ height: "100%" }}>
@@ -106,6 +93,7 @@ export function LogList({ logs }: LogListProps) {
           height={listHeight}
           itemCount={logs.length}
           itemSize={getItemSize}
+          itemData={itemData}
           width="100%"
         >
           {Row}
@@ -119,3 +107,47 @@ export function LogList({ logs }: LogListProps) {
     </div>
   );
 }
+
+interface RowData {
+  logs: Log[];
+  selectedLogIndex: number | null;
+  openDropdownIndex: number | null;
+  onSelect: (index: number) => void;
+  onDropdownOpenChange: (isOpen: boolean, index: number) => void;
+}
+
+const Row = memo(
+  ({
+    data,
+    index,
+    style,
+  }: {
+    data: RowData;
+    index: number;
+    style: React.CSSProperties;
+  }) => {
+    const {
+      logs,
+      selectedLogIndex,
+      openDropdownIndex,
+      onSelect,
+      onDropdownOpenChange,
+    } = data;
+    const log = logs[index];
+    const isSelected = index === selectedLogIndex;
+    const isDropdownOpen = index === openDropdownIndex;
+
+    return (
+      <div style={style}>
+        <LogEntry
+          log={log}
+          isSelected={isSelected}
+          isDropdownOpen={isDropdownOpen}
+          onSelect={() => onSelect(index)}
+          onDropdownOpenChange={(isOpen) => onDropdownOpenChange(isOpen, index)}
+        />
+      </div>
+    );
+  },
+  areEqual
+);

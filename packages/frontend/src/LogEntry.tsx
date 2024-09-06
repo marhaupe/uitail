@@ -12,13 +12,13 @@ import anser from "anser";
 import { useHotkeys } from "react-hotkeys-hook";
 import { Button } from "@/components/ui/button";
 
-type LogEntryProps = {
+export interface LogEntryProps {
   log: Log;
   isDropdownOpen: boolean;
   isSelected: boolean;
   onSelect: () => void;
   onDropdownOpenChange: (isOpen: boolean) => void;
-};
+}
 
 export function LogEntry({
   log,
