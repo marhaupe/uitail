@@ -8,3 +8,4 @@ Features:
 - Hint of we go down and there is no more item left (e.g. large log as the last item)
 - case insensitive search
 - filter out messages
+- figure out what to do with the histogram

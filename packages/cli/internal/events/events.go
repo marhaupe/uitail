@@ -21,8 +21,6 @@ type EventService struct {
 type Session struct {
 	streamID string
 	filter   string
-	after    *time.Time
-	before   *time.Time
 }
 
 type Log struct {
@@ -51,27 +49,11 @@ func (s *EventService) setup() {
 	s.sseServer.AutoStream = true
 	s.sseServer.OnSubscribe = func(streamID string, sub *sse.Subscriber) {
 		filter := sub.URL.Query().Get("filter")
-		after := sub.URL.Query().Get("after")
-		afterTime, err := time.Parse(time.RFC3339, after)
-		afterTimeFilter := &afterTime
-		if err != nil {
-			afterTimeFilter = nil
-		}
-
-		before := sub.URL.Query().Get("before")
-		beforeTime, err := time.Parse(time.RFC3339, before)
-		beforeTimeFilter := &beforeTime
-		if err != nil {
-			beforeTimeFilter = nil
-		}
-
 		s.sessions.Store(streamID, Session{
 			streamID: streamID,
 			filter:   filter,
-			after:    afterTimeFilter,
-			before:   beforeTimeFilter,
 		})
-		err = s.Replay(streamID)
+		err := s.Replay(streamID)
 		if err != nil {
 			log.Printf("error replaying logs for new stream: %s\n", err)
 		}
@@ -85,7 +67,6 @@ func (s *EventService) Replay(token string) error {
 	if !s.sseServer.StreamExists(token) {
 		return fmt.Errorf("stream does not exist")
 	}
-
 	storedSession, ok := s.sessions.Load(token)
 	if !ok {
 		return fmt.Errorf("session does not exist")
@@ -94,7 +75,6 @@ func (s *EventService) Replay(token string) error {
 	if !ok {
 		return fmt.Errorf("session is not of type Session")
 	}
-
 	filteredLogs := make([]Log, 0)
 	for _, log := range s.logs {
 		if matchFilter(session, log) {
@@ -132,12 +112,6 @@ func (s *EventService) Publish(l Log) error {
 }
 
 func matchFilter(session Session, l Log) bool {
-	if session.after != nil && l.Timestamp.Before(*session.after) {
-		return false
-	}
-	if session.before != nil && l.Timestamp.After(*session.before) {
-		return false
-	}
 	if len(session.filter) > 0 && !strings.Contains(l.Message, session.filter) {
 		return false
 	}
