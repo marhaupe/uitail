@@ -118,21 +118,6 @@ export function LogEntry({
           !(isHovered || isSelected) && "invisible"
         )}
       >
-        {/* TODO: Add expand/collapse button that works with virtualizations */}
-        {/* {log.message.split("\n").length > 1 ? (
-          <Button
-            onClick={onToggleExpand}
-            variant="outline"
-            className="p-0 m-0 size-5"
-          >
-            {collapsed ? (
-              <PlusIcon className="size-4" />
-            ) : (
-              <MinusIcon className="size-4" />
-            )}
-          </Button>
-        ) : null} */}
-
         <DropdownMenu
           open={isDropdownOpen}
           onOpenChange={handleDropdownOpenChange}
