@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Log } from "./App";
 import {
   DropdownMenu,
@@ -32,10 +32,17 @@ export function LogEntry({
 }: LogEntryProps) {
   const [collapsed, setCollapsed] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const [selectedMenuItem, setSelectedMenuItem] = useState<number>(0);
+  const menuItemRefs = useRef<(HTMLDivElement | null)[]>([]);
+
   useHotkeys(
     "l,enter",
     () => {
-      onDropdownOpenChange(!isDropdownOpen);
+      if (isDropdownOpen && selectedMenuItem !== null) {
+        menuItemRefs.current[selectedMenuItem]?.click();
+      } else {
+        onDropdownOpenChange(true);
+      }
     },
     {
       enabled: isSelected,
@@ -43,9 +50,12 @@ export function LogEntry({
   );
 
   useHotkeys(
-    "j,k",
-    () => {
-      console.log(`dev: hier?`);
+    "j,k,ArrowDown,ArrowUp",
+    ({ key }) => {
+      setSelectedMenuItem((prev) => {
+        const next = key === "j" || key === "ArrowDown" ? prev + 1 : prev - 1;
+        return Math.max(0, Math.min(next, menuItemRefs.current.length - 1));
+      });
     },
     {
       enabled: isDropdownOpen,
@@ -135,14 +145,26 @@ export function LogEntry({
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
-            <DropdownMenuItem onClick={onSelectToFilter}>
+            <DropdownMenuItem
+              ref={(el) => (menuItemRefs.current[0] = el)}
+              onClick={onSelectToFilter}
+              className={cn(selectedMenuItem === 0 && "bg-slate-100")}
+            >
               Show logs before
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={onSelectFromFilter}>
+            <DropdownMenuItem
+              ref={(el) => (menuItemRefs.current[1] = el)}
+              onClick={onSelectFromFilter}
+              className={cn(selectedMenuItem === 1 && "bg-slate-100")}
+            >
               Show logs after
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={copyToClipboard}>
-              Copy to clipboard
+            <DropdownMenuItem
+              ref={(el) => (menuItemRefs.current[2] = el)}
+              onClick={copyToClipboard}
+              className={cn(selectedMenuItem === 2 && "bg-slate-100")}
+            >
+              Copy message
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

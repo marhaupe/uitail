@@ -185,7 +185,7 @@ export function App() {
         />
         {logs.length > 0 ? (
           <CardContent className="overflow-scroll">
-            {logs.slice(0, 2).map((log, index) => {
+            {logs.slice(0, 1).map((log, index) => {
               const isSelected = index === selectedLogIndex;
               const isDropdownOpen = index === openDropdownIndex;
               return (
