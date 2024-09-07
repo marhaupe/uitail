@@ -1,8 +1,6 @@
 package cmd
 
 import (
-	"bufio"
-	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -10,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
@@ -53,8 +52,6 @@ func Execute() {
 type Root struct {
 	logService   *logs.LogService
 	staticServer *static.Static
-	in           *bufio.Scanner
-	line         []byte
 	command      string
 	cmd          *exec.Cmd
 }
@@ -77,14 +74,8 @@ func (a *Root) startCommand() error {
 		return errors.New("command already started")
 	}
 	a.cmd = exec.Command("bash", "-c", a.command)
-	stdout, err := a.cmd.StdoutPipe()
-	a.cmd.Stderr = a.cmd.Stdout
-	if err != nil {
-		return err
-	}
-	scanner := bufio.NewScanner(stdout)
-	scanner.Split(bufio.ScanBytes)
-	a.in = scanner
+	a.cmd.Stdout = a
+	a.cmd.Stderr = a
 	go func() {
 		if err := a.cmd.Run(); err != nil {
 			log.Printf("error running command: %s", err)
@@ -156,80 +147,28 @@ func (a *Root) Start() error {
 	}()
 
 	fmt.Printf("🚀 Running uitail on http://localhost:%d\n", port)
-
-	return a.startReadLoop()
+	a.startReadLoop()
+	return nil
 }
 
-func (r *Root) startReadLoop() error {
+func (r *Root) startReadLoop() {
 	terminateChan := make(chan os.Signal, 1)
 	signal.Notify(terminateChan, os.Interrupt, syscall.SIGTERM)
-	go func() {
-		<-terminateChan
-		os.Exit(0)
-	}()
-	for {
-		select {
-		case <-terminateChan:
-			return nil
-		default:
-			r.nextLine()
-			if r.line == nil {
-				continue
-			}
-			l, err := r.parseText()
-			if err != nil {
-				log.Printf("error parsing line: %s", err)
-				continue
-			}
-			err = r.logService.Publish(logs.Log{
-				Timestamp: l.Timestamp,
-				Message:   l.Message,
-			})
-			if err != nil {
-				log.Printf("error publishing line: %s", err)
-			}
-		}
-	}
+	<-terminateChan
+	os.Exit(0)
 }
 
-func (r *Root) parseText() (*Log, error) {
-	timestamp := time.Now()
-	openingBraceCount := 0
-	closingBraceCount := 0
-	lines := [][]byte{}
-	for {
-		lines = append(lines, r.line)
-		for _, char := range r.line {
-			if char == '{' || char == '[' {
-				openingBraceCount++
-			}
-			if char == '}' || char == ']' {
-				closingBraceCount++
-			}
-		}
-		if openingBraceCount == closingBraceCount {
-			message := bytes.Join(lines, []byte{'\n'})
-			return &Log{
-				Timestamp: timestamp,
-				Message:   string(message),
-			}, nil
-		}
-		r.nextLine()
+func (r *Root) Write(p []byte) (n int, err error) {
+	l := &Log{
+		Message:   strings.TrimRight(string(p), "\n"),
+		Timestamp: time.Now().UTC(),
 	}
-}
-
-func (r *Root) nextLine() {
-	r.line = []byte{}
-	for {
-		r.in.Scan()
-		char := r.in.Bytes()
-		if len(char) == 0 {
-			time.Sleep(time.Millisecond * 10)
-			continue
-		}
-		if char[0] == '\n' {
-			return
-		}
-		r.line = append(r.line, char...)
+	err = r.logService.Publish(logs.Log{
+		Timestamp: l.Timestamp,
+		Message:   l.Message,
+	})
+	if err != nil {
+		return 0, err
 	}
+	return len(p), nil
 }
