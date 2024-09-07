@@ -126,12 +126,14 @@ func (a *Root) Start() error {
 			if err != nil {
 				ctx.StatusCode(iris.StatusInternalServerError)
 				ctx.WriteString(fmt.Sprintf("error stopping command: %s", err))
+				fmt.Println("error stopping command", err)
 				return
 			}
 			err = a.startCommand()
 			if err != nil {
 				ctx.StatusCode(iris.StatusInternalServerError)
 				ctx.WriteString(fmt.Sprintf("error starting command: %s", err))
+				fmt.Println("error starting command", err)
 				return
 			}
 			ctx.StatusCode(iris.StatusOK)
