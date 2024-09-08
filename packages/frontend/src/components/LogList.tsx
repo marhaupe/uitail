@@ -8,11 +8,11 @@ import React, {
   useImperativeHandle,
 } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
-import { LogEntry } from "../LogEntry";
-import { Log } from "../App";
+import { LogEntry } from "./LogEntry";
 import { CardContent } from "./ui/card";
 import { LucideLoaderCircle } from "lucide-react";
 import { VariableSizeList as List, areEqual } from "react-window";
+import { Log } from "@/types";
 
 export interface LogListRef {
   scrollToTop: () => void;
@@ -28,9 +28,7 @@ const LINE_HEIGHT = 5 * REM_IN_PX;
 
 export const LogList = forwardRef<LogListRef, LogListProps>(({ logs }, ref) => {
   const [selectedLogIndex, setSelectedLogIndex] = useState<number | null>(null);
-  const [openDropdownIndex, setOpenDropdownIndex] = useState<number | null>(
-    null
-  );
+  const [openDropdownIndex, setOpenDropdownIndex] = useState<number | null>(null);
   const listRef = useRef<List>(null);
   const [listHeight, setListHeight] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -149,22 +147,8 @@ interface RowData {
 }
 
 const Row = memo(
-  ({
-    data,
-    index,
-    style,
-  }: {
-    data: RowData;
-    index: number;
-    style: React.CSSProperties;
-  }) => {
-    const {
-      logs,
-      selectedLogIndex,
-      openDropdownIndex,
-      onSelect,
-      onDropdownOpenChange,
-    } = data;
+  ({ data, index, style }: { data: RowData; index: number; style: React.CSSProperties }) => {
+    const { logs, selectedLogIndex, openDropdownIndex, onSelect, onDropdownOpenChange } = data;
     const log = logs[index];
     const isSelected = index === selectedLogIndex;
     const isDropdownOpen = index === openDropdownIndex;

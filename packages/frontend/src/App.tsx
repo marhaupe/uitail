@@ -1,22 +1,13 @@
 import { useEffect, useState, useRef } from "react";
-import { Static, Type } from "@sinclair/typebox";
-import { Value } from "@sinclair/typebox/value";
 import { nanoid } from "nanoid";
 import { Card } from "@/components/ui/card";
-import { ControlBar } from "@/ControlBar";
+import { ControlBar } from "./components/ControlBar";
 import { config } from "./config";
 import { useHotkeys } from "react-hotkeys-hook";
 import { LogList, LogListRef } from "./components/LogList";
 import { toast } from "sonner";
 import { useQueryParams, StringParam, BooleanParam, withDefault } from "use-query-params";
-
-const logSchema = Type.Object({
-  timestamp: Type.String(),
-  message: Type.String(),
-});
-const logsSchema = Type.Array(logSchema);
-
-export type Log = Static<typeof logSchema>;
+import { Log } from "@/types";
 
 export function App() {
   const [logs, setLogs] = useState<Log[]>([]);
@@ -69,7 +60,7 @@ export function App() {
     const eventSource = new EventSource(url);
     eventSource.onmessage = (event: MessageEvent) => {
       try {
-        const logs = Value.Decode(logsSchema, JSON.parse(event.data));
+        const logs = JSON.parse(event.data);
         setLogs((prevLogs) => [...prevLogs, ...logs]);
       } catch (error) {
         console.error("Error parsing log", error);

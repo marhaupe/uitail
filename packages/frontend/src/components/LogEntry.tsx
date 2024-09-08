@@ -1,5 +1,4 @@
 import { useState, useRef } from "react";
-import { Log } from "./App";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -7,10 +6,11 @@ import {
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 import { MoreHorizontalIcon } from "lucide-react";
-import { cn } from "./lib/utils";
 import anser from "anser";
 import { useHotkeys } from "react-hotkeys-hook";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { Log } from "@/types";
 
 export interface LogEntryProps {
   log: Log;
@@ -57,9 +57,7 @@ export function LogEntry({
     "j,k,ArrowDown,ArrowUp",
     ({ key }) => {
       let nextSelectedMenuItem =
-        key === "j" || key === "ArrowDown"
-          ? selectedMenuItem + 1
-          : selectedMenuItem - 1;
+        key === "j" || key === "ArrowDown" ? selectedMenuItem + 1 : selectedMenuItem - 1;
       nextSelectedMenuItem = Math.max(
         0,
         Math.min(nextSelectedMenuItem, menuItemRefs.current.length - 1)
@@ -106,9 +104,7 @@ export function LogEntry({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <div className="flex-shrink-0">
-        {new Date(log.timestamp).toISOString().split("T")[1]}
-      </div>
+      <div className="flex-shrink-0">{new Date(log.timestamp).toISOString().split("T")[1]}</div>
       <div className="flex-grow whitespace-pre overflow-x-auto flex-col">
         {renderLogMessage(log.message)}
       </div>
@@ -118,10 +114,7 @@ export function LogEntry({
           !(isHovered || isSelected) && "invisible"
         )}
       >
-        <DropdownMenu
-          open={isDropdownOpen}
-          onOpenChange={handleDropdownOpenChange}
-        >
+        <DropdownMenu open={isDropdownOpen} onOpenChange={handleDropdownOpenChange}>
           <DropdownMenuTrigger asChild>
             <Button
               variant="outline"
