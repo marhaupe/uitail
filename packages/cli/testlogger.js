@@ -1,11 +1,5 @@
-const fs = require("fs");
-
 async function main() {
   console.log("testlogger.js");
-  // const data = fs.readFileSync("data.json", "utf8");
-  // console.log(`dev: large string`, data);
-  const smallerData = fs.readFileSync("smaller_data.json", "utf8");
-  console.log(`dev: smaller string`, smallerData);
   while (true) {
     console.log(`dev: object`, { dev: "dev" });
     console.log(`dev: array`, [1, 2, 3, 4]);

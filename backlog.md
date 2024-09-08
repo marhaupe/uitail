@@ -1,7 +1,6 @@
 Before open source:
 
 - refactoring
-- remove / obfuscate / cleanup test data
 - figure out how to work around pipe buffer sizes
   - we could try to run a separate process that approximates the pipe buffer size by printing a growing amount of data
     for that to work, we'd need to be able to reset the client state from the server
