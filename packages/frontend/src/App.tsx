@@ -8,12 +8,7 @@ import { config } from "./config";
 import { useHotkeys } from "react-hotkeys-hook";
 import { LogList, LogListRef } from "./components/LogList";
 import { toast } from "sonner";
-import {
-  useQueryParams,
-  StringParam,
-  BooleanParam,
-  withDefault,
-} from "use-query-params";
+import { useQueryParams, StringParam, BooleanParam, withDefault } from "use-query-params";
 
 const logSchema = Type.Object({
   timestamp: Type.String(),
@@ -31,18 +26,14 @@ export function App() {
   });
 
   const searchInputRef = useRef<HTMLInputElement>(null);
-  const [eventSource, setEventSource] = useState<EventSource>();
 
   const logListRef = useRef<LogListRef>(null);
 
   async function handleClear() {
     try {
-      const response = await fetch(
-        `${config.backendUrl}${config.routes.clear}`,
-        {
-          method: "POST",
-        }
-      );
+      const response = await fetch(`${config.backendUrl}${config.routes.clear}`, {
+        method: "POST",
+      });
       if (response.ok) {
         setLogs([]);
         toast.success("Logs cleared");
@@ -54,12 +45,9 @@ export function App() {
 
   async function handleRestart() {
     try {
-      const response = await fetch(
-        `${config.backendUrl}${config.routes.restart}`,
-        {
-          method: "POST",
-        }
-      );
+      const response = await fetch(`${config.backendUrl}${config.routes.restart}`, {
+        method: "POST",
+      });
       if (response.ok) {
         toast.success("Agent restarted");
       }
@@ -71,40 +59,26 @@ export function App() {
   useEffect(() => {
     const url = new URL(config.backendUrl + config.routes.events);
     url.searchParams.set("stream", nanoid());
-    if (filterState.message && filterState.message.trim().length > 0) {
+    if (filterState.message) {
       url.searchParams.set("filter", filterState.message);
-    } else {
-      url.searchParams.delete("filter");
     }
     if (filterState.caseInsensitive) {
-      url.searchParams.set(
-        "caseInsensitive",
-        filterState.caseInsensitive.toString()
-      );
-    } else {
-      url.searchParams.delete("caseInsensitive");
+      url.searchParams.set("caseInsensitive", filterState.caseInsensitive.toString());
     }
-    const newEventSource = new EventSource(url);
-    setEventSource(newEventSource);
-    return () => {
-      setLogs([]);
-      newEventSource.close();
-    };
-  }, [filterState]);
-
-  useEffect(() => {
-    if (!eventSource) {
-      return;
-    }
+    setLogs([]);
+    const eventSource = new EventSource(url);
     eventSource.onmessage = (event: MessageEvent) => {
       try {
         const logs = Value.Decode(logsSchema, JSON.parse(event.data));
         setLogs((prevLogs) => [...prevLogs, ...logs]);
       } catch (error) {
-        console.error("error parsing log", error);
+        console.error("Error parsing log", error);
       }
     };
-  }, [eventSource]);
+    return () => {
+      eventSource.close();
+    };
+  }, [filterState]);
 
   useHotkeys("mod+k", () => {
     handleClear();

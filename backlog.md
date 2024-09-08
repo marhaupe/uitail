@@ -10,6 +10,7 @@ Before open source:
   - also, add a "caveats" section to the readme
 - add a readme
 - publish via goreleaser
+- icon
 
 Features:
 
