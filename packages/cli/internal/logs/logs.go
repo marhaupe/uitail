@@ -3,7 +3,6 @@ package logs
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"strings"
 	"sync"
 	"time"
@@ -74,7 +73,7 @@ func (s *LogService) setup() {
 		})
 		err := s.replay(streamID)
 		if err != nil {
-			log.Printf("error replaying logs for new stream: %s\n", err)
+			fmt.Printf("Error replaying logs for new stream: %s\n", err)
 		}
 	}
 	s.sseServer.OnUnsubscribe = func(streamID string, sub *sse.Subscriber) {
@@ -92,7 +91,7 @@ func (s *LogService) replay(token string) error {
 	}
 	session, ok := storedSession.(Session)
 	if !ok {
-		return fmt.Errorf("session is not of type Session")
+		return fmt.Errorf("session is not of type session")
 	}
 	filteredLogs := make([]Log, 0)
 	for _, log := range s.logs {

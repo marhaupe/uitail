@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"os"
 	"os/exec"
 	"os/signal"
@@ -28,7 +27,7 @@ var rootCmd = &cobra.Command{
 		root := New(args[0])
 		err := root.Start()
 		if err != nil {
-			fmt.Println("error starting uitail", err)
+			fmt.Println("Failed to start uitail", err)
 			os.Exit(1)
 		}
 	},
@@ -39,7 +38,7 @@ var (
 )
 
 func init() {
-	rootCmd.Flags().IntVarP(&port, "port", "p", 8787, "port to start the server on")
+	rootCmd.Flags().IntVarP(&port, "port", "p", 8787, "Port to start the server on")
 }
 
 func Execute() {
@@ -78,7 +77,7 @@ func (a *Root) startCommand() error {
 	a.cmd.Stderr = a
 	go func() {
 		if err := a.cmd.Run(); err != nil {
-			log.Printf("error running command: %s", err)
+			fmt.Printf("Error running command: %s\n", err)
 		}
 	}()
 	return nil
@@ -126,14 +125,14 @@ func (a *Root) Start() error {
 			if err != nil {
 				ctx.StatusCode(iris.StatusInternalServerError)
 				ctx.WriteString(fmt.Sprintf("error stopping command: %s", err))
-				fmt.Println("error stopping command", err)
+				fmt.Println("Error stopping command", err)
 				return
 			}
 			err = a.startCommand()
 			if err != nil {
 				ctx.StatusCode(iris.StatusInternalServerError)
 				ctx.WriteString(fmt.Sprintf("error starting command: %s", err))
-				fmt.Println("error starting command", err)
+				fmt.Println("Error starting command", err)
 				return
 			}
 			ctx.StatusCode(iris.StatusOK)
@@ -144,7 +143,8 @@ func (a *Root) Start() error {
 		app.Get("/{asset:path}", a.staticServer.Handler())
 
 		if err := app.Listen(fmt.Sprintf(":%d", port), config); err != nil {
-			log.Fatalf("Failed to start server: %v", err)
+			fmt.Printf("Failed to start server: %v\n", err)
+			os.Exit(1)
 		}
 	}()
 
