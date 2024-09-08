@@ -1,9 +1,7 @@
 Features:
 
-- Test: Restart session (In particular environment variables)
-- persist filter state in URL
-- filter out messages
 - fix flicker when typing
+- filter out messages
 - unify log / fmt.Println usage in cli
 - figure out how to work around pipe buffer sizes
   - we could try to run a separate process that approximates the pipe buffer size by printing a growing amount of data

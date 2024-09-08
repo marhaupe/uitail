@@ -3,11 +3,17 @@ import { Static, Type } from "@sinclair/typebox";
 import { Value } from "@sinclair/typebox/value";
 import { nanoid } from "nanoid";
 import { Card } from "@/components/ui/card";
-import { FilterState, ControlBar } from "@/ControlBar";
+import { ControlBar } from "@/ControlBar";
 import { config } from "./config";
 import { useHotkeys } from "react-hotkeys-hook";
 import { LogList, LogListRef } from "./components/LogList";
 import { toast } from "sonner";
+import {
+  useQueryParams,
+  StringParam,
+  BooleanParam,
+  withDefault,
+} from "use-query-params";
 
 const logSchema = Type.Object({
   timestamp: Type.String(),
@@ -19,9 +25,9 @@ export type Log = Static<typeof logSchema>;
 
 export function App() {
   const [logs, setLogs] = useState<Log[]>([]);
-  const [filterState, setFilterState] = useState<FilterState>({
-    message: "",
-    caseInsensitive: false,
+  const [filterState, setFilterState] = useQueryParams({
+    message: withDefault(StringParam, undefined),
+    caseInsensitive: withDefault(BooleanParam, undefined),
   });
 
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -65,14 +71,17 @@ export function App() {
   useEffect(() => {
     const url = new URL(config.backendUrl + config.routes.events);
     url.searchParams.set("stream", nanoid());
-    if (filterState.message.trim().length > 0) {
+    if (filterState.message && filterState.message.trim().length > 0) {
       url.searchParams.set("filter", filterState.message);
+    } else {
+      url.searchParams.delete("filter");
+    }
+    if (filterState.caseInsensitive) {
       url.searchParams.set(
         "caseInsensitive",
         filterState.caseInsensitive.toString()
       );
     } else {
-      url.searchParams.delete("filter");
       url.searchParams.delete("caseInsensitive");
     }
     const newEventSource = new EventSource(url);

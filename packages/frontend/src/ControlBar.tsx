@@ -22,8 +22,8 @@ type Props = {
 };
 
 export type FilterState = {
-  message: string;
-  caseInsensitive: boolean;
+  message?: string;
+  caseInsensitive?: boolean;
 };
 
 export const ControlBar = forwardRef(function ControlBar(
