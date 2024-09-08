@@ -17,6 +17,7 @@ import { Log } from "@/types";
 export interface LogListRef {
   scrollToTop: () => void;
   scrollToBottom: () => void;
+  resetVirtualization: () => void;
 }
 
 interface LogListProps {
@@ -104,12 +105,15 @@ export const LogList = forwardRef<LogListRef, LogListProps>(({ logs }, ref) => {
 
   useImperativeHandle(
     ref,
-    () => ({
+    (): LogListRef => ({
       scrollToTop: () => {
         scrollToIndex(0);
       },
       scrollToBottom: () => {
         scrollToIndex(logs.length - 1);
+      },
+      resetVirtualization: () => {
+        listRef.current?.resetAfterIndex(0);
       },
     }),
     [logs.length]
@@ -119,6 +123,7 @@ export const LogList = forwardRef<LogListRef, LogListProps>(({ logs }, ref) => {
     <div ref={containerRef} style={{ height: "100%" }}>
       {logs.length > 0 ? (
         <List
+          itemKey={(index, data) => data.logs[index].id}
           ref={listRef}
           height={listHeight}
           itemCount={logs.length}
@@ -149,6 +154,7 @@ interface RowData {
 const Row = memo(
   ({ data, index, style }: { data: RowData; index: number; style: React.CSSProperties }) => {
     const { logs, selectedLogIndex, openDropdownIndex, onSelect, onDropdownOpenChange } = data;
+    console.log(`dev: row logs.length`, logs.length);
     const log = logs[index];
     const isSelected = index === selectedLogIndex;
     const isDropdownOpen = index === openDropdownIndex;

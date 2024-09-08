@@ -56,12 +56,16 @@ export function App() {
     if (filterState.caseInsensitive) {
       url.searchParams.set("caseInsensitive", filterState.caseInsensitive.toString());
     }
-    setLogs([]);
     const eventSource = new EventSource(url);
     eventSource.onmessage = (event: MessageEvent) => {
       try {
-        const logs = JSON.parse(event.data);
-        setLogs((prevLogs) => [...prevLogs, ...logs]);
+        const incomingLogs = JSON.parse(event.data);
+        if (incomingLogs.length !== 1) {
+          logListRef.current?.resetVirtualization();
+          setLogs(incomingLogs);
+        } else {
+          setLogs((prevLogs) => [...prevLogs, ...incomingLogs]);
+        }
       } catch (error) {
         console.error("Error parsing log", error);
       }

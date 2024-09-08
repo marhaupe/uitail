@@ -11,6 +11,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/iris-contrib/middleware/cors"
 	"github.com/kataras/iris/v12"
 	"github.com/marhaupe/uitail/internal/logs"
@@ -53,11 +54,6 @@ type Root struct {
 	staticServer *static.Static
 	command      string
 	cmd          *exec.Cmd
-}
-
-type Log struct {
-	Timestamp time.Time `json:"timestamp"`
-	Message   string    `json:"message"`
 }
 
 func New(command string) *Root {
@@ -161,13 +157,10 @@ func (r *Root) startReadLoop() {
 }
 
 func (r *Root) Write(p []byte) (n int, err error) {
-	l := &Log{
-		Message:   strings.TrimRight(string(p), "\n"),
-		Timestamp: time.Now().UTC(),
-	}
 	err = r.logService.Publish(logs.Log{
-		Timestamp: l.Timestamp,
-		Message:   l.Message,
+		ID:        uuid.New().String(),
+		Timestamp: time.Now().UTC(),
+		Message:   strings.TrimRight(string(p), "\n"),
 	})
 	if err != nil {
 		return 0, err
