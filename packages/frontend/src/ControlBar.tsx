@@ -1,5 +1,5 @@
 import { Input } from "@/components/ui/input";
-import { forwardRef, useImperativeHandle, useEffect, useCallback } from "react";
+import { forwardRef, useImperativeHandle, useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import debounce from "lodash.debounce";
 import { Toggle } from "@/components/ui/toggle";
@@ -53,15 +53,14 @@ export const ControlBar = forwardRef(function ControlBar(
     },
   }));
 
-  const debouncedFilterChange = useCallback(
-    debounce((value: { message: string; caseInsensitive: boolean }) => {
+  const debouncedFilterChange = useMemo(() => {
+    return debounce((value: { message: string; caseInsensitive: boolean }) => {
       onFilterStateChange({
         ...filter,
         ...value,
       });
-    }, 200),
-    [filter, onFilterStateChange]
-  );
+    }, 200);
+  }, [filter, onFilterStateChange]);
 
   useEffect(() => {
     const subscription = watch((value, { name }) => {
