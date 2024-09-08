@@ -1,6 +1,5 @@
 Before open source:
 
-- fix flicker when typing
 - refactoring
 - remove / obfuscate / cleanup test data
 - figure out how to work around pipe buffer sizes
@@ -9,6 +8,7 @@ Before open source:
   - while we're figuring this out, we should ensure that there are ways around broken up logs, e.g. a "show next X lines" feature
   - also, add a "caveats" section to the readme
 - add a readme
+- dynamic port allocation
 - publish via goreleaser
 - icon
 
