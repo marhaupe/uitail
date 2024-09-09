@@ -3,10 +3,12 @@ package logs
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"strings"
 	"sync"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/kataras/iris/v12"
 	"github.com/r3labs/sse/v2"
 )
@@ -15,6 +17,7 @@ type LogService struct {
 	logs      []Log
 	sseServer *sse.Server
 	sessions  sync.Map
+	io.Writer
 }
 
 type Session struct {
@@ -30,38 +33,11 @@ type Log struct {
 }
 
 func New() *LogService {
-	service := &LogService{
+	s := &LogService{
 		sseServer: sse.New(),
 		logs:      make([]Log, 0),
 		sessions:  sync.Map{},
 	}
-	service.setup()
-	return service
-}
-
-func (s *LogService) EventHandler() iris.Handler {
-	return func(ctx iris.Context) {
-		s.sseServer.ServeHTTP(ctx.ResponseWriter(), ctx.Request())
-	}
-}
-
-func (s *LogService) ClearHandler() iris.Handler {
-	return func(ctx iris.Context) {
-		s.logs = make([]Log, 0)
-		ctx.StatusCode(iris.StatusOK)
-		ctx.WriteString("OK")
-	}
-}
-
-func (s *LogService) RestartHandler() iris.Handler {
-	return func(ctx iris.Context) {
-		// TODO: Implement
-		ctx.StatusCode(iris.StatusOK)
-		ctx.WriteString("OK")
-	}
-}
-
-func (s *LogService) setup() {
 	s.sseServer.AutoReplay = false
 	s.sseServer.AutoStream = true
 	s.sseServer.OnSubscribe = func(streamID string, sub *sse.Subscriber) {
@@ -80,6 +56,51 @@ func (s *LogService) setup() {
 	s.sseServer.OnUnsubscribe = func(streamID string, sub *sse.Subscriber) {
 		s.sessions.Delete(streamID)
 	}
+	return s
+}
+
+func (s *LogService) EventHandler() iris.Handler {
+	return func(ctx iris.Context) {
+		s.sseServer.ServeHTTP(ctx.ResponseWriter(), ctx.Request())
+	}
+}
+
+func (s *LogService) ClearHandler() iris.Handler {
+	return func(ctx iris.Context) {
+		s.logs = make([]Log, 0)
+		ctx.StatusCode(iris.StatusOK)
+		ctx.WriteString("OK")
+	}
+}
+
+func (s *LogService) Write(p []byte) (n int, err error) {
+	l := Log{
+		ID:        uuid.New().String(),
+		Timestamp: time.Now().UTC(),
+		Message:   strings.TrimRight(string(p), "\n"),
+	}
+	s.Publish(l)
+	return len(p), nil
+}
+
+func (s *LogService) Publish(l Log) error {
+	s.logs = append(s.logs, l)
+	data, err := json.Marshal([]Log{l})
+	if err != nil {
+		return fmt.Errorf("error marshalling log: %s", err)
+	}
+	s.sessions.Range(func(key, sessionData interface{}) bool {
+		session, ok := sessionData.(Session)
+		if !ok || !matchFilter(session, l) {
+			return true
+		}
+		s.sseServer.Publish(session.streamID, &sse.Event{
+			Data: data,
+		})
+		return true
+	})
+
+	return nil
 }
 
 func (s *LogService) replay(token string) error {
@@ -107,26 +128,6 @@ func (s *LogService) replay(token string) error {
 	s.sseServer.Publish(token, &sse.Event{
 		Data: data,
 	})
-	return nil
-}
-
-func (s *LogService) Publish(l Log) error {
-	s.logs = append(s.logs, l)
-	data, err := json.Marshal([]Log{l})
-	if err != nil {
-		return fmt.Errorf("error marshalling log: %s", err)
-	}
-	s.sessions.Range(func(key, sessionData interface{}) bool {
-		session, ok := sessionData.(Session)
-		if !ok || !matchFilter(session, l) {
-			return true
-		}
-		s.sseServer.Publish(session.streamID, &sse.Event{
-			Data: data,
-		})
-		return true
-	})
-
 	return nil
 }
 
