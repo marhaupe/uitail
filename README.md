@@ -3,8 +3,6 @@
 [![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
 
-![Logo](.github/logo.png)
-
 > uitail is like `tail -f` but with a beautiful UI.
 
 If you are like me and like debugging by printing things to the console, then you probably have struggled by finding the logs you want to see in the sea of text. If you're unlucky, your terminal might even truncate the logs at some point. Of course you could work around this by piping the logs to other command line programs, but what's the fun in that?
