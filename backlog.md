@@ -1,14 +1,12 @@
 Before open source:
 
 - add a readme
-- dynamic port allocation
 - publish via goreleaser
 - icon
 
 Features:
 
 - filter out messages
-- fix restarting a stopped command
 - figure out how to work around pipe buffer sizes
   - we could try to run a separate process that approximates the pipe buffer size by printing a growing amount of data
     for that to work, we'd need to be able to reset the client state from the server

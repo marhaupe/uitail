@@ -23,7 +23,6 @@ var rootCmd = &cobra.Command{
 		root := New(args[0])
 		err := root.Start()
 		if err != nil {
-			fmt.Println("Failed to start uitail", err)
 			os.Exit(1)
 		}
 	},
@@ -34,7 +33,7 @@ var (
 )
 
 func init() {
-	rootCmd.Flags().IntVarP(&port, "port", "p", 8787, "Port to start the server on")
+	rootCmd.Flags().IntVarP(&port, "port", "p", 8765, "Port to start the agent on")
 }
 
 func Execute() {
@@ -64,11 +63,8 @@ func New(command string) *Root {
 
 func (a *Root) Start() error {
 	a.executor.Run()
-
-	config := iris.WithConfiguration(iris.Configuration{
-		DisableStartupLog: true,
-	})
 	app := iris.New()
+	app.Logger().SetTimeFormat("")
 
 	crs := cors.New(cors.Options{
 		AllowedOrigins: []string{"*"},
@@ -97,5 +93,12 @@ func (a *Root) Start() error {
 	app.Get("/{asset:path}", a.staticServer.Handler())
 
 	fmt.Printf("🚀 Running uitail on http://localhost:%d\n", port)
-	return app.Listen(fmt.Sprintf(":%d", port), config, iris.WithoutServerError(iris.ErrServerClosed))
+	return app.Listen(fmt.Sprintf(":%d", port),
+		iris.WithConfiguration(iris.Configuration{
+			DisableStartupLog: true,
+			IgnoreServerErrors: []string{
+				iris.ErrServerClosed.Error(),
+			},
+		}),
+	)
 }
