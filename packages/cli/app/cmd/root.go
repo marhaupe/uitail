@@ -16,7 +16,7 @@ import (
 
 var rootCmd = &cobra.Command{
 	Use:     "uitail",
-	Short:   "uitail is a tail-like tool with a beautiful UI",
+	Short:   "uitail is like `tail -f` but with a beautiful UI",
 	Example: "uitail \"ping google.com\"",
 	Args:    cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
