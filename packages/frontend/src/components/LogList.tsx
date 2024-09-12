@@ -154,7 +154,6 @@ interface RowData {
 const Row = memo(
   ({ data, index, style }: { data: RowData; index: number; style: React.CSSProperties }) => {
     const { logs, selectedLogIndex, openDropdownIndex, onSelect, onDropdownOpenChange } = data;
-    console.log(`dev: row logs.length`, logs.length);
     const log = logs[index];
     const isSelected = index === selectedLogIndex;
     const isDropdownOpen = index === openDropdownIndex;
