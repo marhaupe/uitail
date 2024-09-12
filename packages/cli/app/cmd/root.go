@@ -76,6 +76,7 @@ func (a *Root) Start() error {
 		ctx, cancel := context.WithTimeout(context.Background(), timeout)
 		defer cancel()
 		app.Shutdown(ctx)
+		a.executor.Stop()
 	})
 
 	app.Post("/restart", func(ctx iris.Context) {
