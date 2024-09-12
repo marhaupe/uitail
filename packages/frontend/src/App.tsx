@@ -111,8 +111,8 @@ export function App() {
   );
 
   return (
-    <div className="flex flex-1 flex-col min-h-screen bg-slate-50">
-      <div className="container p-6">
+    <div className="bg-slate-50 overflow-hidden">
+      <div className="container p-6 h-screen">
         <Card className="relative flex flex-col flex-1">
           <ControlBar
             filter={filterState}
