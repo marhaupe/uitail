@@ -20,9 +20,19 @@ export function App() {
 
   const logListRef = useRef<LogListRef>(null);
 
+  useEffect(() => {
+    const prevTitle = document.title;
+    if (config.command) {
+      document.title = "uitail - " + config.command;
+    }
+    return () => {
+      document.title = prevTitle;
+    };
+  }, []);
+
   async function handleClear() {
     try {
-      const response = await fetch(`${config.backendUrl}${config.routes.clear}`, {
+      const response = await fetch(`http://localhost:${config.port}${config.routes.clear}`, {
         method: "POST",
       });
       if (response.ok) {
@@ -36,7 +46,7 @@ export function App() {
 
   async function handleRestart() {
     try {
-      const response = await fetch(`${config.backendUrl}${config.routes.restart}`, {
+      const response = await fetch(`http://localhost:${config.port}${config.routes.restart}`, {
         method: "POST",
       });
       if (response.ok) {
@@ -48,7 +58,7 @@ export function App() {
   }
 
   useEffect(() => {
-    const url = new URL(config.backendUrl + config.routes.events);
+    const url = new URL(`http://localhost:${config.port}${config.routes.events}`);
     url.searchParams.set("stream", nanoid());
     if (filterState.message) {
       url.searchParams.set("filter", filterState.message);

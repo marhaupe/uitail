@@ -1,8 +1,20 @@
+declare global {
+  interface Window {
+    config: {
+      port: number;
+      command: string;
+    };
+  }
+}
+
 export const config = {
-  backendUrl: "http://localhost:8787",
   routes: {
     events: "/events",
     restart: "/restart",
     clear: "/clear",
   },
+  ...(window.config || {
+    port: 8765,
+    command: "",
+  }),
 };

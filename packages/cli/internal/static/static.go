@@ -2,9 +2,11 @@ package static
 
 import (
 	"embed"
+	"encoding/json"
 	"fmt"
 	"io/fs"
 	"net/http"
+	"strings"
 
 	"github.com/kataras/iris/v12"
 )
@@ -12,10 +14,9 @@ import (
 //go:embed all:dist
 var dist embed.FS
 
-type Static struct{}
-
-func New() *Static {
-	return &Static{}
+type Static struct {
+	Command string
+	Port    int
 }
 
 func (s *Static) Handler() iris.Handler {
@@ -28,8 +29,38 @@ func (s *Static) Handler() iris.Handler {
 		}
 	}
 
-	return iris.FileServer(http.FS(assets), iris.DirOptions{
-		IndexName: "index.html",
-		ShowList:  true, // Enable directory listing for debugging
-	})
+	return func(ctx iris.Context) {
+		path := ctx.Request().URL.Path
+		if path == "/" || path == "/index.html" {
+			content, err := fs.ReadFile(assets, "index.html")
+			if err != nil {
+				ctx.StatusCode(http.StatusInternalServerError)
+				ctx.WriteString("Error reading index.html")
+				return
+			}
+			config := struct {
+				Command string `json:"command"`
+				Port    int    `json:"port"`
+			}{
+				Command: s.Command,
+				Port:    s.Port,
+			}
+			configJSON, err := json.Marshal(config)
+			if err != nil {
+				ctx.StatusCode(http.StatusInternalServerError)
+				ctx.WriteString("Error marshalling config")
+				return
+			}
+			configScript := fmt.Sprintf("<script>window.config = %s;</script>", configJSON)
+			modifiedContent := strings.ReplaceAll(string(content), "<!--#echo var=\"configscript\" -->", configScript)
+
+			ctx.ContentType("text/html")
+			ctx.WriteString(modifiedContent)
+			return
+		}
+
+		iris.FileServer(http.FS(assets), iris.DirOptions{
+			IndexName: "index.html",
+		})(ctx)
+	}
 }

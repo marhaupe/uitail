@@ -52,8 +52,11 @@ type Root struct {
 func New(command string) *Root {
 	logsService := logs.New()
 	return &Root{
-		logService:   logsService,
-		staticServer: static.New(),
+		logService: logsService,
+		staticServer: &static.Static{
+			Command: command,
+			Port:    port,
+		},
 		executor: &executor.Executor{
 			Command: command,
 			Out:     logsService,
