@@ -8,6 +8,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/acarl005/stripansi"
 	"github.com/google/uuid"
 	"github.com/kataras/iris/v12"
 	"github.com/r3labs/sse/v2"
@@ -74,10 +75,12 @@ func (s *LogService) ClearHandler() iris.Handler {
 }
 
 func (s *LogService) Write(p []byte) (n int, err error) {
+	msg := strings.TrimRight(string(p), "\n")
+	msg = stripansi.Strip(msg)
 	l := Log{
 		ID:        uuid.New().String(),
 		Timestamp: time.Now().UTC(),
-		Message:   strings.TrimRight(string(p), "\n"),
+		Message:   msg,
 	}
 	s.Publish(l)
 	return len(p), nil

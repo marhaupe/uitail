@@ -6,7 +6,6 @@ import {
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 import { MoreHorizontalIcon } from "lucide-react";
-import anser from "anser";
 import { useHotkeys } from "react-hotkeys-hook";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -71,24 +70,6 @@ export function LogEntry({
     [selectedMenuItem]
   );
 
-  function renderLogMessage(message: string) {
-    return anser
-      .ansiToJson(message, { use_classes: true })
-      .map((part: anser.AnserJsonEntry, index: number) => (
-        <span
-          key={index}
-          // This should stay stable to keep the line height consistent
-          className="inline-block h-5 leading-5"
-          style={{
-            color: ANSI_COLOR_MAP[part.fg] || "inherit",
-            backgroundColor: ANSI_COLOR_MAP[part.bg] || "inherit",
-          }}
-        >
-          {part.content}
-        </span>
-      ));
-  }
-
   function copyToClipboard() {
     navigator.clipboard.writeText(log.message);
   }
@@ -105,8 +86,8 @@ export function LogEntry({
       onMouseLeave={() => setIsHovered(false)}
     >
       <div className="flex-shrink-0">{new Date(log.timestamp).toISOString().split("T")[1]}</div>
-      <div className="flex-grow whitespace-pre overflow-x-auto flex-col">
-        {renderLogMessage(log.message)}
+      <div className="flex-grow whitespace-pre overflow-x-auto flex-col min-h-5 leading-5">
+        {log.message}
       </div>
       <div
         className={cn(
@@ -141,22 +122,3 @@ export function LogEntry({
     </div>
   );
 }
-
-const ANSI_COLOR_MAP: Record<string, string> = {
-  "ansi-black": "#020617",
-  "ansi-red": "#DC143C",
-  "ansi-green": "#22c55e",
-  "ansi-yellow": "#eab308",
-  "ansi-blue": "#3b82f6",
-  "ansi-magenta": "#ec4899",
-  "ansi-cyan": "#6ee7b7",
-  "ansi-white": "#f8fafc",
-  "ansi-bright-black": "#64748b",
-  "ansi-bright-red": "#B22222",
-  "ansi-bright-green": "#228B22",
-  "ansi-bright-yellow": "#DAA520",
-  "ansi-bright-blue": "#191970",
-  "ansi-bright-magenta": "#800080",
-  "ansi-bright-cyan": "#00688B",
-  "ansi-bright-white": "#708090",
-};
