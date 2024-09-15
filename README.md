@@ -33,8 +33,8 @@ Running uitail will start an agent on port `:8765`. You can access the UI on `ht
 
 Most shortcuts are documented in the UI, apart from these:
 
-- `j` / `k`: Navigate between logs.
-- `l` / `Enter`: Open a log in more detail.
+- `j` / `k` or `ArrowDown` / `ArrowUp`: Navigate between logs.
+- `l` or `ArrowRight`: Open a log in more detail.
 
 ### Options
 
