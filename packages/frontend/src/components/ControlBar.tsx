@@ -3,16 +3,14 @@ import { forwardRef, useImperativeHandle, useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import debounce from "lodash.debounce";
 import { Toggle } from "@/components/ui/toggle";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Trash2, RefreshCw, ChevronsUp, ChevronsDown } from "lucide-react";
+import { Circle } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 type Props = {
+  status: "active" | "inactive";
   filter: FilterState;
   onFilterStateChange: (filter: FilterState) => void;
   onClear: () => void;
@@ -28,6 +26,7 @@ export type FilterState = {
 
 export const ControlBar = forwardRef(function ControlBar(
   {
+    status,
     filter,
     onFilterStateChange,
     onClear,
@@ -95,9 +94,7 @@ export const ControlBar = forwardRef(function ControlBar(
                     <Toggle
                       aria-label="Match case"
                       pressed={watch("caseInsensitive")}
-                      onPressedChange={(pressed) =>
-                        setValue("caseInsensitive", pressed)
-                      }
+                      onPressedChange={(pressed) => setValue("caseInsensitive", pressed)}
                     >
                       Aa
                     </Toggle>
@@ -112,17 +109,25 @@ export const ControlBar = forwardRef(function ControlBar(
         </div>
         <div className="flex items-center space-x-1">
           <Button variant="ghost" size="sm" onClick={onScrollToTop}>
-            <ChevronsUp className="w-4 h-4" />
+            <ChevronsUp className="size-4" />
           </Button>
           <Button variant="ghost" size="sm" onClick={onScrollToBottom}>
-            <ChevronsDown className="w-4 h-4" />
+            <ChevronsDown className="size-4" />
           </Button>
           <Button variant="ghost" size="sm" onClick={onClear}>
-            <Trash2 className="w-4 h-4 mr-1" />
+            <Trash2 className="size-4" />
           </Button>
           <Button variant="ghost" size="sm" onClick={onRestart}>
-            <RefreshCw className="w-4 h-4 mr-1" />
+            <RefreshCw className="size-4" />
           </Button>
+          <div className={buttonVariants({ variant: "ghost", size: "sm" })}>
+            <Circle
+              className={cn(
+                "size-2 animate-pulse",
+                status === "active" ? "fill-green-500 text-green-500" : "fill-red-500 text-red-500"
+              )}
+            />
+          </div>
         </div>
       </div>
     </div>

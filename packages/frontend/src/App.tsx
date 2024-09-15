@@ -11,6 +11,7 @@ import { Log } from "@/types";
 
 export function App() {
   const [logs, setLogs] = useState<Log[]>([]);
+  const [connectionStatus, setConnectionStatus] = useState<"active" | "inactive">("active");
   const [filterState, setFilterState] = useQueryParams({
     message: withDefault(StringParam, undefined),
     caseInsensitive: withDefault(BooleanParam, undefined),
@@ -21,14 +22,42 @@ export function App() {
   const logListRef = useRef<LogListRef>(null);
 
   useEffect(() => {
-    const prevTitle = document.title;
-    if (config.command) {
-      document.title = "uitail - " + config.command;
+    const url = new URL(`http://localhost:${config.port}${config.routes.events}`);
+    url.searchParams.set("stream", nanoid());
+    if (filterState.message) {
+      url.searchParams.set("filter", filterState.message);
     }
-    return () => {
-      document.title = prevTitle;
+    if (filterState.caseInsensitive) {
+      url.searchParams.set("caseInsensitive", filterState.caseInsensitive.toString());
+    }
+    const eventSource = new EventSource(url);
+
+    eventSource.onopen = () => {
+      setConnectionStatus("active");
     };
-  }, []);
+
+    eventSource.onerror = () => {
+      setConnectionStatus("inactive");
+    };
+
+    eventSource.onmessage = (event: MessageEvent) => {
+      try {
+        const incomingLogs = JSON.parse(event.data);
+        if (incomingLogs.length !== 1) {
+          logListRef.current?.resetVirtualization();
+          setLogs(incomingLogs);
+        } else {
+          setLogs((prevLogs) => [...prevLogs, ...incomingLogs]);
+        }
+      } catch (error) {
+        console.error("Error parsing log", error);
+      }
+    };
+
+    return () => {
+      eventSource.close();
+    };
+  }, [filterState]);
 
   async function handleClear() {
     try {
@@ -51,39 +80,14 @@ export function App() {
       });
       if (response.ok) {
         toast.success("Agent restarted");
+        setConnectionStatus("active");
       }
     } catch (error) {
       console.error("Error restarting agent:", error);
+      setConnectionStatus("inactive");
+      toast.error("Failed to restart agent");
     }
   }
-
-  useEffect(() => {
-    const url = new URL(`http://localhost:${config.port}${config.routes.events}`);
-    url.searchParams.set("stream", nanoid());
-    if (filterState.message) {
-      url.searchParams.set("filter", filterState.message);
-    }
-    if (filterState.caseInsensitive) {
-      url.searchParams.set("caseInsensitive", filterState.caseInsensitive.toString());
-    }
-    const eventSource = new EventSource(url);
-    eventSource.onmessage = (event: MessageEvent) => {
-      try {
-        const incomingLogs = JSON.parse(event.data);
-        if (incomingLogs.length !== 1) {
-          logListRef.current?.resetVirtualization();
-          setLogs(incomingLogs);
-        } else {
-          setLogs((prevLogs) => [...prevLogs, ...incomingLogs]);
-        }
-      } catch (error) {
-        console.error("Error parsing log", error);
-      }
-    };
-    return () => {
-      eventSource.close();
-    };
-  }, [filterState]);
 
   useHotkeys("mod+k", () => {
     handleClear();
@@ -115,6 +119,7 @@ export function App() {
       <div className="container p-6 h-screen">
         <Card className="relative flex flex-col flex-1">
           <ControlBar
+            status={connectionStatus}
             filter={filterState}
             ref={searchInputRef}
             onFilterStateChange={(query) => setFilterState(query)}
