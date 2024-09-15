@@ -5,6 +5,9 @@ go 1.22.1
 toolchain go1.22.6
 
 require (
+	github.com/acarl005/stripansi v0.0.0-20180116102854-5a71ef0e047d
+	github.com/google/uuid v1.6.0
+	github.com/iris-contrib/middleware/cors v0.0.0-20240502084239-34f27409ce72
 	github.com/kataras/iris/v12 v12.2.11
 	github.com/r3labs/sse/v2 v2.10.0
 )
@@ -15,19 +18,14 @@ require (
 	github.com/CloudyKit/jet/v6 v6.2.0 // indirect
 	github.com/Joker/jade v1.1.3 // indirect
 	github.com/Shopify/goreferrer v0.0.0-20240724165105-aceaa0259138 // indirect
-	github.com/acarl005/stripansi v0.0.0-20180116102854-5a71ef0e047d // indirect
 	github.com/andybalholm/brotli v1.1.0 // indirect
 	github.com/aymerick/douceur v0.2.0 // indirect
 	github.com/fatih/structs v1.1.0 // indirect
 	github.com/flosch/pongo2/v4 v4.0.2 // indirect
-	github.com/golang-jwt/jwt/v4 v4.5.0 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/gomarkdown/markdown v0.0.0-20240730141124-034f12af3bf6 // indirect
-	github.com/google/uuid v1.6.0 // indirect
 	github.com/gorilla/css v1.0.1 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
-	github.com/iris-contrib/middleware/cors v0.0.0-20240502084239-34f27409ce72 // indirect
-	github.com/iris-contrib/middleware/jwt v0.0.0-20240502084239-34f27409ce72 // indirect
 	github.com/iris-contrib/schema v0.0.6 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/kataras/blocks v0.0.8 // indirect
