@@ -9,6 +9,8 @@ If you are like me and like debugging by printing things to the console, then yo
 
 uitail solves this problem by providing a beautiful UI to interact with your logs. Keyboard navigation is baked in, so you can focus on actually debugging efficiently.
 
+![Example](.github/demo.gif)
+
 ## Installation
 
 ### Homebrew
@@ -33,8 +35,6 @@ Most shortcuts are documented in the UI, apart from these:
 
 - `j` / `k`: Navigate between logs.
 - `l` / `Enter`: Open a log in more detail.
-
-![Example](.github/demo.gif)
 
 ### Options
 
