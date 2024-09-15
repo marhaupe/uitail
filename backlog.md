@@ -6,6 +6,8 @@ Before open source:
 
 Features:
 
+- handling for connection refused -> assume agent has been killed
+- right click on a log line instead or in addition to the context menu button
 - open ui in browser by pressing -u, in general maybe a expo like interface
 - filter out messages
 - figure out how to work around pipe buffer sizes
