@@ -29,7 +29,16 @@ Grab the latest release [binaries](https://github.com/marhaupe/uitail/releases).
 
 Running uitail will start an agent on port `:8765`. You can access the UI on `http://localhost:8765`.
 
+Most shortcuts are documented in the UI, apart from these:
+
+- `j` / `k`: Navigate between logs.
+- `l` / `Enter`: Open a log in more detail.
+
 ![Example](.github/demo.gif)
+
+### Options
+
+> -p, --port number: Port to run the agent on (default: 8765)
 
 ### Caveats
 
