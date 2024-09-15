@@ -53,5 +53,6 @@ brews:
       name: Marcel Haupenthal
       email: marhaupe97@gmail.com
     directory: formula
+    homepage: "https://github.com/marhaupe/uitail"
     dependencies:
       - git
