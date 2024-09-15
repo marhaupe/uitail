@@ -77,17 +77,17 @@ export const ControlBar = forwardRef(function ControlBar(
   }, [watch, debouncedFilterChange]);
 
   return (
-    <div className="sticky rounded-md top-0 p-2 bg-background z-50">
-      <div className="flex flex-row items-center justify-between h-10 text-sm gap-2">
-        <div className="relative flex-grow">
-          <Input
-            {...register("message")}
-            id="message-input"
-            placeholder="Filter ('/')"
-            className="font-mono text-xs"
-          />
-          <div className="absolute top-0 right-0">
-            <TooltipProvider>
+    <TooltipProvider>
+      <div className="sticky rounded-md top-0 p-2 bg-background z-50">
+        <div className="flex flex-row items-center justify-between h-10 text-sm gap-2">
+          <div className="relative flex-grow">
+            <Input
+              {...register("message")}
+              id="message-input"
+              placeholder="Filter ('/')"
+              className="font-mono text-xs"
+            />
+            <div className="absolute top-0 right-0">
               <Tooltip>
                 <TooltipTrigger asChild>
                   <span>
@@ -104,32 +104,79 @@ export const ControlBar = forwardRef(function ControlBar(
                   <p>Match case</p>
                 </TooltipContent>
               </Tooltip>
-            </TooltipProvider>
+            </div>
           </div>
-        </div>
-        <div className="flex items-center space-x-1">
-          <Button variant="ghost" size="sm" onClick={onScrollToTop}>
-            <ChevronsUp className="size-4" />
-          </Button>
-          <Button variant="ghost" size="sm" onClick={onScrollToBottom}>
-            <ChevronsDown className="size-4" />
-          </Button>
-          <Button variant="ghost" size="sm" onClick={onClear}>
-            <Trash2 className="size-4" />
-          </Button>
-          <Button variant="ghost" size="sm" onClick={onRestart}>
-            <RefreshCw className="size-4" />
-          </Button>
-          <div className={buttonVariants({ variant: "ghost", size: "sm" })}>
-            <Circle
-              className={cn(
-                "size-2 animate-pulse",
-                status === "active" ? "fill-green-500 text-green-500" : "fill-red-500 text-red-500"
-              )}
-            />
+          <div className="flex items-center space-x-1">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="sm" onClick={onScrollToTop}>
+                  <ChevronsUp className="size-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>
+                  Scroll to top <span className="text-muted-foreground">(g)</span>
+                </p>
+              </TooltipContent>
+            </Tooltip>
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="sm" onClick={onScrollToBottom}>
+                  <ChevronsDown className="size-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>
+                  Scroll to bottom <span className="text-muted-foreground">(G)</span>
+                </p>
+              </TooltipContent>
+            </Tooltip>
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="sm" onClick={onClear}>
+                  <Trash2 className="size-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>
+                  Clear logs <span className="text-muted-foreground">(⌘+K)</span>
+                </p>
+              </TooltipContent>
+            </Tooltip>
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="sm" onClick={onRestart}>
+                  <RefreshCw className="size-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Restart agent</p>
+              </TooltipContent>
+            </Tooltip>
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className={buttonVariants({ variant: "ghost", size: "sm" })}>
+                  <Circle
+                    className={cn(
+                      "size-2 animate-pulse",
+                      status === "active"
+                        ? "fill-green-500 text-green-500"
+                        : "fill-red-500 text-red-500"
+                    )}
+                  />
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{status === "active" ? "Agent running" : "Agent disconnected"}</p>
+              </TooltipContent>
+            </Tooltip>
           </div>
         </div>
       </div>
-    </div>
+    </TooltipProvider>
   );
 });
