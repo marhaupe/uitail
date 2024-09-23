@@ -21,7 +21,7 @@ type Props = {
 
 export type FilterState = {
   message?: string;
-  caseInsensitive?: boolean;
+  caseSensitive?: boolean;
 };
 
 export const ControlBar = forwardRef(function ControlBar(
@@ -39,7 +39,7 @@ export const ControlBar = forwardRef(function ControlBar(
   const { register, watch, setFocus, setValue } = useForm({
     defaultValues: {
       message: filter.message,
-      caseInsensitive: filter.caseInsensitive,
+      caseSensitive: filter.caseSensitive,
     },
   });
 
@@ -53,7 +53,7 @@ export const ControlBar = forwardRef(function ControlBar(
   }));
 
   const debouncedFilterChange = useMemo(() => {
-    return debounce((value: { message: string; caseInsensitive: boolean }) => {
+    return debounce((value: { message: string; caseSensitive: boolean }) => {
       onFilterStateChange({
         ...filter,
         ...value,
@@ -63,10 +63,10 @@ export const ControlBar = forwardRef(function ControlBar(
 
   useEffect(() => {
     const subscription = watch((value, { name }) => {
-      if (name === "message" || name === "caseInsensitive") {
+      if (name === "message" || name === "caseSensitive") {
         debouncedFilterChange({
           message: value.message as string,
-          caseInsensitive: value.caseInsensitive as boolean,
+          caseSensitive: value.caseSensitive as boolean,
         });
       }
     });
@@ -93,8 +93,8 @@ export const ControlBar = forwardRef(function ControlBar(
                   <span>
                     <Toggle
                       aria-label="Match case"
-                      pressed={watch("caseInsensitive")}
-                      onPressedChange={(pressed) => setValue("caseInsensitive", pressed)}
+                      pressed={watch("caseSensitive")}
+                      onPressedChange={(pressed) => setValue("caseSensitive", pressed)}
                     >
                       Aa
                     </Toggle>

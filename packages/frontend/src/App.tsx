@@ -14,7 +14,7 @@ export function App() {
   const [connectionStatus, setConnectionStatus] = useState<"active" | "inactive">("active");
   const [filterState, setFilterState] = useQueryParams({
     message: withDefault(StringParam, undefined),
-    caseInsensitive: withDefault(BooleanParam, undefined),
+    caseSensitive: withDefault(BooleanParam, undefined),
   });
 
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -27,8 +27,8 @@ export function App() {
     if (filterState.message) {
       url.searchParams.set("filter", filterState.message);
     }
-    if (filterState.caseInsensitive) {
-      url.searchParams.set("caseInsensitive", filterState.caseInsensitive.toString());
+    if (filterState.caseSensitive) {
+      url.searchParams.set("caseSensitive", filterState.caseSensitive.toString());
     }
     const eventSource = new EventSource(url);
 
