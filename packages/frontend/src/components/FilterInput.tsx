@@ -33,13 +33,15 @@ export function FilterInput({
       <div className="absolute top-0 right-0 flex items-center">
         <Tooltip>
           <TooltipTrigger asChild>
-            <Toggle
-              aria-label="Match case"
-              pressed={caseSensitive}
-              onPressedChange={onCaseSensitiveChange}
-            >
-              Aa
-            </Toggle>
+            <span>
+              <Toggle
+                aria-label="Match case"
+                pressed={caseSensitive}
+                onPressedChange={onCaseSensitiveChange}
+              >
+                Aa
+              </Toggle>
+            </span>
           </TooltipTrigger>
           <TooltipContent>
             <p>Match case</p>
