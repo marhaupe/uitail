@@ -78,14 +78,16 @@ export function LogEntry({
     <div
       onClick={onSelect}
       className={cn(
-        "flex w-full group relative h-full items-start text-slate-900 font-mono text-sm tracking-tight px-4 gap-10",
+        "flex w-full group relative h-full items-start text-slate-900 font-mono text-sm tracking-tight px-4 gap-10 border-l-2",
         (isHovered || isSelected) && "bg-slate-100",
-        isSelected && "border-l-4 border-primary"
+        isSelected ? "border-primary" : "border-transparent"
       )}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <div className="flex-shrink-0">{new Date(log.timestamp).toISOString().split("T")[1]}</div>
+      <div className="flex-shrink-0 text-slate-400">
+        {new Date(log.timestamp).toISOString().split("T")[1]}
+      </div>
       <div className="flex-grow whitespace-pre overflow-x-auto flex-col min-h-5 leading-5">
         {log.message}
       </div>
@@ -98,14 +100,14 @@ export function LogEntry({
         <DropdownMenu open={isDropdownOpen} onOpenChange={handleDropdownOpenChange}>
           <DropdownMenuTrigger asChild>
             <Button
-              variant="outline"
+              variant="ghost"
               className="p-0 m-0 size-5"
               onPointerDown={() => {
                 handleDropdownOpenChange(!isDropdownOpen);
                 onSelect();
               }}
             >
-              <MoreHorizontalIcon className="size-4" />
+              <MoreHorizontalIcon className="size-5" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent onCloseAutoFocus={(e) => e.preventDefault()}>
