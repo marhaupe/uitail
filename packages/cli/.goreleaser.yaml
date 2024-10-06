@@ -10,12 +10,11 @@ version: 2
 
 before:
   hooks:
+    - make ui
     - go mod tidy
 
 builds:
   - main: ./main.go
-    hooks:
-      pre: cd ../frontend && pnpm run build
     binary: uitail
     env:
       - CGO_ENABLED=0
