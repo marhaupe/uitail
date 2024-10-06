@@ -21,7 +21,7 @@ export function FilterInput({
     <div className="relative flex-grow">
       <Input {...register("message")} id="message-input" className="font-mono text-xs pr-16 peer" />
       {message.length === 0 && (
-        <div className="absolute top-0 bottom-0 left-3 flex items-center peer-focus:invisible visible">
+        <div className="absolute top-0 bottom-0 left-3 flex items-center peer-focus:invisible visible cursor-text pointer-events-none">
           <Badge variant="outline" className="flex gap-1 items-center">
             <p className="text-[10px] font-mono font-normal">Focus</p>
             <kbd className="inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
