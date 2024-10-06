@@ -1,13 +1,12 @@
-import { Input } from "@/components/ui/input";
 import { forwardRef, useImperativeHandle, useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import debounce from "lodash.debounce";
-import { Toggle } from "@/components/ui/toggle";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Trash2, RefreshCw, ChevronsUp, ChevronsDown } from "lucide-react";
 import { Circle } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { FilterInput } from "@/components/FilterInput";
 
 type Props = {
   status: "active" | "inactive";
@@ -80,32 +79,12 @@ export const ControlBar = forwardRef(function ControlBar(
     <TooltipProvider>
       <div className="sticky rounded-md top-0 p-2 bg-background z-50">
         <div className="flex flex-row items-center justify-between h-10 text-sm gap-2">
-          <div className="relative flex-grow">
-            <Input
-              {...register("message")}
-              id="message-input"
-              placeholder="Filter ('/')"
-              className="font-mono text-xs"
-            />
-            <div className="absolute top-0 right-0">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <span>
-                    <Toggle
-                      aria-label="Match case"
-                      pressed={watch("caseSensitive")}
-                      onPressedChange={(pressed) => setValue("caseSensitive", pressed)}
-                    >
-                      Aa
-                    </Toggle>
-                  </span>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Match case</p>
-                </TooltipContent>
-              </Tooltip>
-            </div>
-          </div>
+          <FilterInput
+            register={register}
+            caseSensitive={watch("caseSensitive") ?? false}
+            message={watch("message") ?? ""}
+            onCaseSensitiveChange={(pressed) => setValue("caseSensitive", pressed)}
+          />
           <div className="flex items-center space-x-1">
             <Tooltip>
               <TooltipTrigger asChild>
