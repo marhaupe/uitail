@@ -122,7 +122,12 @@ export function App() {
             status={connectionStatus}
             filter={filterState}
             ref={searchInputRef}
-            onFilterStateChange={(query) => setFilterState(query)}
+            onFilterStateChange={(query) =>
+              setFilterState({
+                caseSensitive: Boolean(query.caseSensitive) || undefined,
+                message: query.message || undefined,
+              })
+            }
             onClear={handleClear}
             onRestart={handleRestart}
             onScrollToTop={() => logListRef.current?.scrollToTop()}
