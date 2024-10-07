@@ -16,6 +16,8 @@ before:
 builds:
   - main: ./main.go
     binary: uitail
+    ldflags:
+      - -s -w -X github.com/marhaupe/uitail/app/cmd.version={{.Version}}
     env:
       - CGO_ENABLED=0
     goos:

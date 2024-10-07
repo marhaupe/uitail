@@ -14,22 +14,23 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var rootCmd = &cobra.Command{
-	Use:     "uitail",
-	Short:   "uitail is like `tail -f` but with a beautiful UI",
-	Example: "uitail \"ping google.com\"",
-	Args:    cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
-		root := New(args[0])
-		err := root.Start()
-		if err != nil {
-			os.Exit(1)
-		}
-	},
-}
-
 var (
-	port int
+	version string
+	port    int
+	rootCmd = &cobra.Command{
+		Use:     "uitail",
+		Short:   "uitail is like `tail -f` but with a beautiful UI",
+		Example: "uitail \"ping google.com\"",
+		Version: version,
+		Args:    cobra.ExactArgs(1),
+		Run: func(cmd *cobra.Command, args []string) {
+			root := New(args[0])
+			err := root.Start()
+			if err != nil {
+				os.Exit(1)
+			}
+		},
+	}
 )
 
 func init() {
