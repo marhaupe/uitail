@@ -11,6 +11,10 @@ uitail solves this problem by providing a beautiful UI to interact with your log
 
 ![Example](.github/demo.gif)
 
+## Demo
+
+You can try the demo [here](https://uitail-demo.pages.dev/).
+
 ## Installation
 
 ### Homebrew

@@ -1,93 +1,54 @@
-import { useEffect, useState, useRef } from "react";
-import { nanoid } from "nanoid";
+import { useRef, useCallback } from "react";
 import { Card } from "@/components/ui/card";
 import { ControlBar } from "./components/ControlBar";
-import { config } from "./config";
 import { useHotkeys } from "react-hotkeys-hook";
 import { LogList, LogListRef } from "./components/LogList";
-import { toast } from "sonner";
 import { useQueryParams, StringParam, BooleanParam, withDefault } from "use-query-params";
-import { Log } from "@/types";
+import { useBackend } from "@/useBackend";
+import { toast } from "sonner";
 
 export function App() {
-  const [logs, setLogs] = useState<Log[]>([]);
-  const [connectionStatus, setConnectionStatus] = useState<"active" | "inactive">("active");
   const [filterState, setFilterState] = useQueryParams({
     message: withDefault(StringParam, undefined),
     caseSensitive: withDefault(BooleanParam, undefined),
   });
-
   const searchInputRef = useRef<HTMLInputElement>(null);
-
   const logListRef = useRef<LogListRef>(null);
+  const onLogsOverride = useCallback(() => {
+    logListRef.current?.resetVirtualization();
+  }, []);
 
-  useEffect(() => {
-    const url = new URL(`http://localhost:${config.port}${config.routes.events}`);
-    url.searchParams.set("stream", nanoid());
-    if (filterState.message) {
-      url.searchParams.set("filter", filterState.message);
-    }
-    if (filterState.caseSensitive) {
-      url.searchParams.set("caseSensitive", filterState.caseSensitive.toString());
-    }
-    const eventSource = new EventSource(url);
+  const {
+    logs,
+    connectionStatus,
+    handleClear: _handleClear,
+    handleRestart: _handleRestart,
+  } = useBackend({
+    onLogsOverride,
+    filterState,
+  });
 
-    eventSource.onopen = () => {
-      setConnectionStatus("active");
-    };
-
-    eventSource.onerror = () => {
-      setConnectionStatus("inactive");
-    };
-
-    eventSource.onmessage = (event: MessageEvent) => {
-      try {
-        const incomingLogs = JSON.parse(event.data);
-        if (incomingLogs.length !== 1) {
-          logListRef.current?.resetVirtualization();
-          setLogs(incomingLogs);
-        } else {
-          setLogs((prevLogs) => [...prevLogs, ...incomingLogs]);
-        }
-      } catch (error) {
-        console.error("Error parsing log", error);
-      }
-    };
-
-    return () => {
-      eventSource.close();
-    };
-  }, [filterState]);
-
-  async function handleClear() {
-    try {
-      const response = await fetch(`http://localhost:${config.port}${config.routes.clear}`, {
-        method: "POST",
-      });
-      if (response.ok) {
-        setLogs([]);
+  const handleClear = useCallback(() => {
+    _handleClear()
+      .then(() => {
         toast.success("Logs cleared");
-      }
-    } catch (error) {
-      console.error("Error clearing logs:", error);
-    }
-  }
-
-  async function handleRestart() {
-    try {
-      const response = await fetch(`http://localhost:${config.port}${config.routes.restart}`, {
-        method: "POST",
+      })
+      .catch((error) => {
+        console.error("Failed to clear logs", error);
+        toast.error("Failed to clear logs");
       });
-      if (response.ok) {
+  }, [_handleClear]);
+
+  const handleRestart = useCallback(() => {
+    _handleRestart()
+      .then(() => {
         toast.success("Agent restarted");
-        setConnectionStatus("active");
-      }
-    } catch (error) {
-      console.error("Error restarting agent:", error);
-      setConnectionStatus("inactive");
-      toast.error("Failed to restart agent");
-    }
-  }
+      })
+      .catch((error) => {
+        console.error("Failed to restart agent", error);
+        toast.error("Failed to restart agent");
+      });
+  }, [_handleRestart]);
 
   useHotkeys("mod+k", () => {
     handleClear();
