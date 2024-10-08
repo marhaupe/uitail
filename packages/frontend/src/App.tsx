@@ -133,7 +133,6 @@ export function App() {
             onScrollToTop={() => logListRef.current?.scrollToTop()}
             onScrollToBottom={() => logListRef.current?.scrollToBottom()}
           />
-          <div className="h-2" />
           <LogList ref={logListRef} logs={logs} />
         </Card>
       </div>
