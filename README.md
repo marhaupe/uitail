@@ -13,7 +13,7 @@ uitail solves this problem by providing a beautiful UI to interact with your log
 
 ## Demo
 
-You can try the demo [here](https://uitail-demo.pages.dev/).
+You can try the demo [here](https://uitail-demo.pages.dev/). Note that since the search function needs an actual backend, it won't work.
 
 ## Installation
 
