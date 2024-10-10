@@ -8,9 +8,9 @@ COPY packages/frontend/ .
 RUN pnpm build
 
 FROM golang:1.23
-COPY --from=frontend /app/dist ./dist
 WORKDIR /app
 COPY packages/cli/ .
+COPY --from=frontend /app/dist ./internal/static/dist
 RUN go build
 CMD ["./uitail", "sh testlogger.sh"]
 
