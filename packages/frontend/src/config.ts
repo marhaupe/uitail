@@ -1,7 +1,7 @@
 declare global {
   interface Window {
     config: {
-      port: number;
+      backendURL: string;
       command: string;
     };
   }
@@ -14,7 +14,7 @@ export const config = {
     clear: "/clear",
   },
   ...(window.config || {
-    port: 8765,
+    backendURL: "http://localhost:8765",
     command: "",
   }),
 };

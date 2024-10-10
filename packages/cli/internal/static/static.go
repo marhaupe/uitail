@@ -39,11 +39,11 @@ func (s *Static) Handler() iris.Handler {
 				return
 			}
 			config := struct {
-				Command string `json:"command"`
-				Port    int    `json:"port"`
+				Command    string `json:"command"`
+				BackendURL string `json:"backendURL"`
 			}{
-				Command: s.Command,
-				Port:    s.Port,
+				Command:    s.Command,
+				BackendURL: fmt.Sprintf("http://localhost:%d", s.Port),
 			}
 			configJSON, err := json.Marshal(config)
 			if err != nil {
