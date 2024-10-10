@@ -1,20 +1,11 @@
 declare global {
   interface Window {
-    injectedConfig: InjectedConfig;
+    config: {
+      port: number;
+      command: string;
+    };
   }
 }
-
-interface InjectedConfig {
-  useDemoServer: boolean;
-  port: number;
-  command: string;
-}
-
-const defaultInjectedConfig: InjectedConfig = {
-  useDemoServer: true,
-  port: 8765,
-  command: "",
-};
 
 export const config = {
   routes: {
@@ -22,6 +13,8 @@ export const config = {
     restart: "/restart",
     clear: "/clear",
   },
-  ...defaultInjectedConfig,
-  ...(window.injectedConfig || {}),
+  ...(window.config || {
+    port: 8765,
+    command: "",
+  }),
 };
