@@ -6,7 +6,7 @@ COPY packages/frontend/pnpm-lock.yaml .
 RUN pnpm install --frozen-lockfile
 COPY packages/frontend/ .
 RUN pnpm build
-RUN sed -i 's|<!--#echo var="configscript" -->|<script>window.config = {"backendURL": "https://uitail-demo.api.marhaupe.com"};</script>|' dist/index.html
+RUN sed -i 's|<!--#echo var="configscript" -->|<script>window.config = {"backendURL": "http://uitail-demo.api.marhaupe.com"};</script>|' dist/index.html
 
 
 FROM golang:1.23
