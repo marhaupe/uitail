@@ -13,8 +13,9 @@ export function App() {
   const [logs, setLogs] = useState<Log[]>([]);
   const [connectionStatus, setConnectionStatus] = useState<"active" | "inactive">("active");
   const [filterState, setFilterState] = useQueryParams({
-    message: withDefault(StringParam, undefined),
+    query: withDefault(StringParam, undefined),
     caseSensitive: withDefault(BooleanParam, undefined),
+    after: withDefault(StringParam, undefined),
   });
 
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -24,11 +25,14 @@ export function App() {
   useEffect(() => {
     const url = new URL(`${config.backendURL}${config.routes.events}`);
     url.searchParams.set("stream", nanoid());
-    if (filterState.message) {
-      url.searchParams.set("filter", filterState.message);
+    if (filterState.query) {
+      url.searchParams.set("query", filterState.query);
     }
     if (filterState.caseSensitive) {
       url.searchParams.set("caseSensitive", filterState.caseSensitive.toString());
+    }
+    if (filterState.after) {
+      url.searchParams.set("after", filterState.after);
     }
     const eventSource = new EventSource(url);
 
@@ -42,7 +46,7 @@ export function App() {
 
     eventSource.onmessage = (event: MessageEvent) => {
       try {
-        const incomingLogs = JSON.parse(event.data);
+        const incomingLogs = JSON.parse(event.data) as Log[];
         if (incomingLogs.length !== 1) {
           logListRef.current?.resetVirtualization();
           setLogs(incomingLogs);
@@ -59,18 +63,14 @@ export function App() {
     };
   }, [filterState]);
 
-  async function handleClear() {
-    try {
-      const response = await fetch(`${config.backendURL}${config.routes.clear}`, {
-        method: "POST",
-      });
-      if (response.ok) {
-        setLogs([]);
-        toast.success("Logs cleared");
-      }
-    } catch (error) {
-      console.error("Error clearing logs:", error);
-    }
+  function handleClear() {
+    setFilterState((prev) => ({
+      ...prev,
+      after: logs.at(-1)?.id,
+    }));
+    setLogs([]);
+    logListRef.current?.resetVirtualization();
+    toast.success("Logs cleared");
   }
 
   async function handleRestart() {
@@ -125,7 +125,7 @@ export function App() {
             onFilterStateChange={(query) =>
               setFilterState({
                 caseSensitive: Boolean(query.caseSensitive) || undefined,
-                message: query.message || undefined,
+                query: query.query || undefined,
               })
             }
             onClear={handleClear}

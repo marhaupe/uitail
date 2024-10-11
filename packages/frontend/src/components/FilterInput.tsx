@@ -5,22 +5,22 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { UseFormRegister } from "react-hook-form";
 
 type FilterInputProps = {
-  register: UseFormRegister<{ message: string | undefined; caseSensitive: boolean | undefined }>;
+  register: UseFormRegister<{ query: string | undefined; caseSensitive: boolean | undefined }>;
   caseSensitive: boolean;
   onCaseSensitiveChange: (pressed: boolean) => void;
-  message: string;
+  query: string;
 };
 
 export function FilterInput({
   register,
   caseSensitive,
   onCaseSensitiveChange,
-  message,
+  query,
 }: FilterInputProps) {
   return (
     <div className="relative flex-grow">
-      <Input {...register("message")} id="message-input" className="font-mono text-xs pr-16 peer" />
-      {message.length === 0 && (
+      <Input {...register("query")} id="query-input" className="font-mono text-xs pr-16 peer" />
+      {query.length === 0 && (
         <div className="absolute top-0 bottom-0 left-3 flex items-center peer-focus:invisible visible cursor-text pointer-events-none">
           <Badge variant="outline" className="flex gap-1 items-center">
             <p className="text-[10px] font-mono font-normal">Focus</p>

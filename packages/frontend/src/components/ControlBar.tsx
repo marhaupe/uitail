@@ -19,7 +19,7 @@ type Props = {
 };
 
 export type FilterState = {
-  message?: string;
+  query?: string;
   caseSensitive?: boolean;
 };
 
@@ -37,14 +37,14 @@ export const ControlBar = forwardRef(function ControlBar(
 ) {
   const { register, watch, setFocus, setValue } = useForm({
     defaultValues: {
-      message: filter.message,
+      query: filter.query,
       caseSensitive: filter.caseSensitive,
     },
   });
 
   useImperativeHandle(ref, () => ({
     focus: () => {
-      setFocus("message");
+      setFocus("query");
     },
     blur: () => {
       document.getElementById("message-input")?.blur();
@@ -52,7 +52,7 @@ export const ControlBar = forwardRef(function ControlBar(
   }));
 
   const debouncedFilterChange = useMemo(() => {
-    return debounce((value: { message: string; caseSensitive: boolean }) => {
+    return debounce((value: { query: string; caseSensitive: boolean }) => {
       onFilterStateChange({
         ...filter,
         ...value,
@@ -62,9 +62,9 @@ export const ControlBar = forwardRef(function ControlBar(
 
   useEffect(() => {
     const subscription = watch((value, { name }) => {
-      if (name === "message" || name === "caseSensitive") {
+      if (name === "query" || name === "caseSensitive") {
         debouncedFilterChange({
-          message: value.message as string,
+          query: value.query as string,
           caseSensitive: value.caseSensitive as boolean,
         });
       }
@@ -82,7 +82,7 @@ export const ControlBar = forwardRef(function ControlBar(
           <FilterInput
             register={register}
             caseSensitive={watch("caseSensitive") ?? false}
-            message={watch("message") ?? ""}
+            query={watch("query") ?? ""}
             onCaseSensitiveChange={(pressed) => setValue("caseSensitive", pressed)}
           />
           <div className="flex items-center space-x-1">

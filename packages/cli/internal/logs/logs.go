@@ -5,26 +5,27 @@ import (
 	"fmt"
 	"io"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/acarl005/stripansi"
 	"github.com/google/uuid"
 	"github.com/kataras/iris/v12"
+	"github.com/patrickmn/go-cache"
 	"github.com/r3labs/sse/v2"
 )
 
 type LogService struct {
 	logs      []Log
+	sessions  *cache.Cache
 	sseServer *sse.Server
-	sessions  sync.Map
 	io.Writer
 }
 
 type Session struct {
 	streamID      string
-	filter        string
+	query         string
 	caseSensitive bool
+	after         string
 }
 
 type Log struct {
@@ -37,18 +38,20 @@ func New() *LogService {
 	s := &LogService{
 		sseServer: sse.New(),
 		logs:      make([]Log, 0),
-		sessions:  sync.Map{},
+		sessions:  cache.New(cache.NoExpiration, cache.NoExpiration),
 	}
 	s.sseServer.AutoReplay = false
 	s.sseServer.AutoStream = true
 	s.sseServer.OnSubscribe = func(streamID string, sub *sse.Subscriber) {
-		filter := sub.URL.Query().Get("filter")
+		query := sub.URL.Query().Get("query")
 		caseSensitive := sub.URL.Query().Get("caseSensitive") == "true"
-		s.sessions.Store(streamID, Session{
+		after := sub.URL.Query().Get("after")
+		s.sessions.Set(streamID, Session{
 			streamID:      streamID,
-			filter:        filter,
+			query:         query,
+			after:         after,
 			caseSensitive: caseSensitive,
-		})
+		}, cache.NoExpiration)
 		err := s.replay(streamID)
 		if err != nil {
 			fmt.Printf("Error replaying logs for new stream: %s\n", err)
@@ -68,6 +71,13 @@ func (s *LogService) EventHandler() iris.Handler {
 
 func (s *LogService) ClearHandler() iris.Handler {
 	return func(ctx iris.Context) {
+		for key, entry := range s.sessions.Items() {
+			session, ok := entry.Object.(Session)
+			if ok && session.after != "" {
+				session.after = ""
+				s.sessions.Set(key, session, cache.NoExpiration)
+			}
+		}
 		s.logs = make([]Log, 0)
 		ctx.StatusCode(iris.StatusOK)
 		ctx.WriteString("OK")
@@ -92,16 +102,15 @@ func (s *LogService) Publish(l Log) error {
 	if err != nil {
 		return fmt.Errorf("error marshalling log: %s", err)
 	}
-	s.sessions.Range(func(key, sessionData interface{}) bool {
-		session, ok := sessionData.(Session)
+	for _, entry := range s.sessions.Items() {
+		session, ok := entry.Object.(Session)
 		if !ok || !matchFilter(session, l) {
-			return true
+			continue
 		}
 		s.sseServer.Publish(session.streamID, &sse.Event{
 			Data: data,
 		})
-		return true
-	})
+	}
 
 	return nil
 }
@@ -110,7 +119,7 @@ func (s *LogService) replay(token string) error {
 	if !s.sseServer.StreamExists(token) {
 		return fmt.Errorf("stream does not exist")
 	}
-	storedSession, ok := s.sessions.Load(token)
+	storedSession, ok := s.sessions.Get(token)
 	if !ok {
 		return fmt.Errorf("session does not exist")
 	}
@@ -118,13 +127,18 @@ func (s *LogService) replay(token string) error {
 	if !ok {
 		return fmt.Errorf("session is not of type session")
 	}
-	filteredLogs := make([]Log, 0)
-	for _, log := range s.logs {
-		if matchFilter(session, log) {
-			filteredLogs = append(filteredLogs, log)
+	var processedLogs []Log
+	for _, l := range s.logs {
+		if session.after != "" && l.ID == session.after {
+			processedLogs = make([]Log, 0)
+			continue
 		}
+		if matchFilter(session, l) {
+			processedLogs = append(processedLogs, l)
+		}
+
 	}
-	data, err := json.Marshal(filteredLogs)
+	data, err := json.Marshal(processedLogs)
 	if err != nil {
 		return fmt.Errorf("error marshalling logs: %s", err)
 	}
@@ -135,11 +149,11 @@ func (s *LogService) replay(token string) error {
 }
 
 func matchFilter(session Session, l Log) bool {
-	if len(session.filter) > 0 {
+	if len(session.query) > 0 {
 		if session.caseSensitive {
-			return strings.Contains(l.Message, session.filter)
+			return strings.Contains(l.Message, session.query)
 		}
-		return strings.Contains(strings.ToLower(l.Message), strings.ToLower(session.filter))
+		return strings.Contains(strings.ToLower(l.Message), strings.ToLower(session.query))
 	}
 	return true
 }
