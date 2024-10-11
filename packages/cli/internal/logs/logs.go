@@ -71,14 +71,15 @@ func (s *LogService) EventHandler() iris.Handler {
 
 func (s *LogService) ClearHandler() iris.Handler {
 	return func(ctx iris.Context) {
+		s.logs = make([]Log, 0)
 		for key, entry := range s.sessions.Items() {
 			session, ok := entry.Object.(Session)
 			if ok && session.after != "" {
 				session.after = ""
 				s.sessions.Set(key, session, cache.NoExpiration)
 			}
+			s.replay(key)
 		}
-		s.logs = make([]Log, 0)
 		ctx.StatusCode(iris.StatusOK)
 		ctx.WriteString("OK")
 	}
@@ -127,7 +128,7 @@ func (s *LogService) replay(token string) error {
 	if !ok {
 		return fmt.Errorf("session is not of type session")
 	}
-	var processedLogs []Log
+	processedLogs := make([]Log, 0)
 	for _, l := range s.logs {
 		if session.after != "" && l.ID == session.after {
 			processedLogs = make([]Log, 0)
