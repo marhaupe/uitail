@@ -95,9 +95,15 @@ export function App() {
     }
   }
 
-  useHotkeys("mod+k", () => {
-    handleClear();
-  });
+  useHotkeys(
+    "mod+k",
+    () => {
+      handleClear();
+    },
+    {
+      enableOnFormTags: true,
+    }
+  );
 
   useHotkeys(
     "/",
