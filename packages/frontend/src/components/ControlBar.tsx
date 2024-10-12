@@ -21,6 +21,7 @@ type Props = {
 export type FilterState = {
   query?: string;
   caseSensitive?: boolean;
+  regex?: boolean;
 };
 
 export const ControlBar = forwardRef(function ControlBar(
@@ -39,6 +40,7 @@ export const ControlBar = forwardRef(function ControlBar(
     defaultValues: {
       query: filter.query,
       caseSensitive: filter.caseSensitive,
+      regex: filter.regex,
     },
   });
 
@@ -52,7 +54,7 @@ export const ControlBar = forwardRef(function ControlBar(
   }));
 
   const debouncedFilterChange = useMemo(() => {
-    return debounce((value: { query: string; caseSensitive: boolean }) => {
+    return debounce((value: FilterState) => {
       onFilterStateChange({
         ...filter,
         ...value,
@@ -62,10 +64,16 @@ export const ControlBar = forwardRef(function ControlBar(
 
   useEffect(() => {
     const subscription = watch((value, { name }) => {
-      if (name === "query" || name === "caseSensitive") {
+      if (name === "query") {
         debouncedFilterChange({
           query: value.query as string,
           caseSensitive: value.caseSensitive as boolean,
+        });
+      } else {
+        console.log(`dev: name ${name} value ${value}`);
+        onFilterStateChange({
+          ...filter,
+          [name as keyof FilterState]: value[name as keyof typeof value],
         });
       }
     });
@@ -73,7 +81,7 @@ export const ControlBar = forwardRef(function ControlBar(
       subscription.unsubscribe();
       debouncedFilterChange.cancel();
     };
-  }, [watch, debouncedFilterChange]);
+  }, [watch, debouncedFilterChange, onFilterStateChange, filter]);
 
   return (
     <TooltipProvider>
@@ -82,8 +90,10 @@ export const ControlBar = forwardRef(function ControlBar(
           <FilterInput
             register={register}
             caseSensitive={watch("caseSensitive") ?? false}
+            regex={watch("regex") ?? false}
             query={watch("query") ?? ""}
             onCaseSensitiveChange={(pressed) => setValue("caseSensitive", pressed)}
+            onRegexChange={(pressed) => setValue("regex", pressed)}
           />
           <div className="flex items-center space-x-1">
             <Tooltip>

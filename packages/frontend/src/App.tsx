@@ -15,6 +15,7 @@ export function App() {
   const [filterState, setFilterState] = useQueryParams({
     query: withDefault(StringParam, undefined),
     caseSensitive: withDefault(BooleanParam, undefined),
+    regex: withDefault(BooleanParam, undefined),
     after: withDefault(StringParam, undefined),
   });
 
@@ -36,6 +37,9 @@ export function App() {
     }
     if (filterState.caseSensitive) {
       url.searchParams.set("caseSensitive", filterState.caseSensitive.toString());
+    }
+    if (filterState.regex) {
+      url.searchParams.set("regex", filterState.regex.toString());
     }
     if (filterState.after) {
       url.searchParams.set("after", filterState.after);
@@ -136,6 +140,7 @@ export function App() {
             ref={searchInputRef}
             onFilterStateChange={(query) =>
               setFilterState({
+                regex: Boolean(query.regex) || undefined,
                 caseSensitive: Boolean(query.caseSensitive) || undefined,
                 query: query.query || undefined,
               })

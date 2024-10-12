@@ -2,24 +2,33 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Toggle } from "@/components/ui/toggle";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { TooltipProvider } from "@radix-ui/react-tooltip";
 import { UseFormRegister } from "react-hook-form";
 
 type FilterInputProps = {
-  register: UseFormRegister<{ query: string | undefined; caseSensitive: boolean | undefined }>;
-  caseSensitive: boolean;
+  register: UseFormRegister<{
+    query: string | undefined;
+    caseSensitive: boolean | undefined;
+    regex: boolean | undefined;
+  }>;
   onCaseSensitiveChange: (pressed: boolean) => void;
+  onRegexChange: (pressed: boolean) => void;
+  caseSensitive: boolean;
   query: string;
+  regex: boolean;
 };
 
 export function FilterInput({
   register,
   caseSensitive,
   onCaseSensitiveChange,
+  onRegexChange,
   query,
+  regex,
 }: FilterInputProps) {
   return (
     <div className="relative w-full">
-      <Input {...register("query")} id="query-input" className="font-mono text-xs pr-16 peer" />
+      <Input {...register("query")} id="query-input" className="font-mono text-xs pr-28 peer" />
       {query.length === 0 && (
         <div className="absolute top-0 bottom-0 left-3 flex items-center peer-focus:invisible visible cursor-text pointer-events-none">
           <Badge variant="outline" className="flex gap-1 items-center bg-slate-50">
@@ -31,22 +40,42 @@ export function FilterInput({
         </div>
       )}
       <div className="absolute top-0 right-0 flex items-center">
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <span>
-              <Toggle
-                aria-label="Match case"
-                pressed={caseSensitive}
-                onPressedChange={onCaseSensitiveChange}
-              >
-                Aa
-              </Toggle>
-            </span>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>Match case</p>
-          </TooltipContent>
-        </Tooltip>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span>
+                <Toggle
+                  aria-label="Use Regular Expression"
+                  pressed={regex}
+                  onPressedChange={onRegexChange}
+                  className="font-mono text-xs"
+                >
+                  .*
+                </Toggle>
+              </span>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Use Regular Expression</p>
+            </TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span>
+                <Toggle
+                  aria-label="Match Case"
+                  pressed={caseSensitive}
+                  onPressedChange={onCaseSensitiveChange}
+                  className="font-mono text-xs"
+                >
+                  Aa
+                </Toggle>
+              </span>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Match Case</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </div>
     </div>
   );

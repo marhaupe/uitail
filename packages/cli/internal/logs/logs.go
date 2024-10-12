@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"regexp"
 	"strings"
 	"time"
 
@@ -25,6 +26,7 @@ type Session struct {
 	streamID      string
 	query         string
 	caseSensitive bool
+	regex         bool
 	after         string
 }
 
@@ -45,12 +47,14 @@ func New() *LogService {
 	s.sseServer.OnSubscribe = func(streamID string, sub *sse.Subscriber) {
 		query := sub.URL.Query().Get("query")
 		caseSensitive := sub.URL.Query().Get("caseSensitive") == "true"
+		regex := sub.URL.Query().Get("regex") == "true"
 		after := sub.URL.Query().Get("after")
 		s.sessions.Set(streamID, Session{
 			streamID:      streamID,
 			query:         query,
 			after:         after,
 			caseSensitive: caseSensitive,
+			regex:         regex,
 		}, cache.NoExpiration)
 		err := s.replay(streamID)
 		if err != nil {
@@ -135,10 +139,29 @@ func (s *LogService) replay(token string) error {
 
 func matchFilter(session Session, l Log) bool {
 	if len(session.query) > 0 {
-		if session.caseSensitive {
-			return strings.Contains(l.Message, session.query)
+		if session.regex {
+			return matchFilterRegex(session.query, l.Message)
 		}
-		return strings.Contains(strings.ToLower(l.Message), strings.ToLower(session.query))
+		if session.caseSensitive {
+			return matchFilterCaseSensitive(session.query, l.Message)
+		}
+		return matchFilterCaseInsensitive(session.query, l.Message)
 	}
 	return true
+}
+
+func matchFilterRegex(query string, message string) bool {
+	matched, err := regexp.MatchString(query, message)
+	if err != nil {
+		return true
+	}
+	return matched
+}
+
+func matchFilterCaseSensitive(query string, message string) bool {
+	return strings.Contains(message, query)
+}
+
+func matchFilterCaseInsensitive(query string, message string) bool {
+	return strings.Contains(strings.ToLower(message), strings.ToLower(query))
 }
