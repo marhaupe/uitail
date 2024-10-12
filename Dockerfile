@@ -6,7 +6,8 @@ COPY packages/frontend/pnpm-lock.yaml .
 RUN pnpm install --frozen-lockfile
 COPY packages/frontend/ .
 RUN pnpm build
-RUN sed -i 's|<!--#echo var="configscript" -->|<script>window.config = {"backendURL": "https://uitail-demo.api.marhaupe.com"};</script>|' dist/index.html
+# Need to also set everything that static.go overrides since we're replacing the whole ssi block
+RUN sed -i 's|<!--#echo var="configscript" -->|<script>window.config = {"backendURL": "https://uitail-demo.api.marhaupe.com", "command": "sh testlogger.sh"};</script>|' dist/index.html
 
 FROM golang:1.23
 WORKDIR /app
