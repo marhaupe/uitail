@@ -55,17 +55,13 @@ export function App() {
     };
 
     eventSource.onmessage = (event: MessageEvent) => {
-      try {
-        const incomingLogs = JSON.parse(event.data) as Log[];
-        if (incomingLogs.length !== 1) {
-          logListRef.current?.resetVirtualization();
-          setLogs(incomingLogs);
-        } else {
-          setLogs((prevLogs) => [...prevLogs, ...incomingLogs]);
-        }
-      } catch (error) {
-        console.error("Error parsing log", error);
-      }
+      const incomingLogs = safeParseLogs(event.data);
+      logListRef.current?.resetVirtualization();
+      setLogs(incomingLogs);
+      eventSource.onmessage = (event: MessageEvent) => {
+        const incomingLogs = safeParseLogs(event.data);
+        setLogs((prevLogs) => [...prevLogs, ...incomingLogs]);
+      };
     };
 
     return () => {
@@ -155,4 +151,13 @@ export function App() {
       </div>
     </div>
   );
+}
+
+function safeParseLogs(data: string) {
+  try {
+    return JSON.parse(data) as Log[];
+  } catch (error) {
+    console.error("Error parsing log", error);
+    return [];
+  }
 }
