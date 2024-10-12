@@ -47,7 +47,7 @@ export const ControlBar = forwardRef(function ControlBar(
       setFocus("query");
     },
     blur: () => {
-      document.getElementById("message-input")?.blur();
+      document.getElementById("query-input")?.blur();
     },
   }));
 
