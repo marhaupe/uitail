@@ -101,7 +101,7 @@ export function LogEntry({
           <DropdownMenuTrigger asChild>
             <Button
               variant="ghost"
-              className="p-0 m-0 size-5"
+              className="p-0 pl-2 m-0 h-5 bg-slate-100"
               onPointerDown={() => {
                 handleDropdownOpenChange(!isDropdownOpen);
                 onSelect();
