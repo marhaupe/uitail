@@ -1,6 +1,5 @@
-import { forwardRef, useImperativeHandle, useEffect, useMemo } from "react";
+import { forwardRef, useImperativeHandle, useEffect } from "react";
 import { useForm } from "react-hook-form";
-import debounce from "lodash.debounce";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Trash2, RefreshCw, ChevronsUp, ChevronsDown } from "lucide-react";
@@ -51,29 +50,14 @@ export const ControlBar = forwardRef(function ControlBar(
     },
   }));
 
-  const debouncedFilterChange = useMemo(() => {
-    return debounce((value: { query: string; caseSensitive: boolean }) => {
-      onFilterStateChange({
-        ...filter,
-        ...value,
-      });
-    }, 200);
-  }, [filter, onFilterStateChange]);
-
   useEffect(() => {
-    const subscription = watch((value, { name }) => {
-      if (name === "query" || name === "caseSensitive") {
-        debouncedFilterChange({
-          query: value.query as string,
-          caseSensitive: value.caseSensitive as boolean,
-        });
-      }
+    const subscription = watch((value) => {
+      onFilterStateChange(value);
     });
     return () => {
       subscription.unsubscribe();
-      debouncedFilterChange.cancel();
     };
-  }, [watch, debouncedFilterChange]);
+  }, [watch, onFilterStateChange, filter]);
 
   return (
     <TooltipProvider>
