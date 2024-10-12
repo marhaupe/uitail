@@ -122,7 +122,7 @@ export function App() {
 
   return (
     <div className="bg-slate-50 overflow-hidden">
-      <div className="container p-6 h-screen">
+      <div className="md:container md:p-6 h-screen">
         <Card className="relative flex flex-col flex-1">
           <ControlBar
             status={connectionStatus}

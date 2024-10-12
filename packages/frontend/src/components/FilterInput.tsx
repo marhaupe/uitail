@@ -18,7 +18,7 @@ export function FilterInput({
   query,
 }: FilterInputProps) {
   return (
-    <div className="relative flex-grow">
+    <div className="relative w-full">
       <Input {...register("query")} id="query-input" className="font-mono text-xs pr-16 peer" />
       {query.length === 0 && (
         <div className="absolute top-0 bottom-0 left-3 flex items-center peer-focus:invisible visible cursor-text pointer-events-none">

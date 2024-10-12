@@ -78,7 +78,7 @@ export const ControlBar = forwardRef(function ControlBar(
   return (
     <TooltipProvider>
       <div className="sticky rounded-md top-0 p-2 bg-background z-50">
-        <div className="flex flex-row items-center justify-between h-10 text-sm gap-2">
+        <div className="flex flex-col items-end md:flex-row md:items-center h-20 md:h-10 text-sm gap-2">
           <FilterInput
             register={register}
             caseSensitive={watch("caseSensitive") ?? false}
