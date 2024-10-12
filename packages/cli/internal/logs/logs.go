@@ -26,6 +26,7 @@ type Session struct {
 	query         string
 	caseSensitive bool
 	after         string
+	createdAt     time.Time
 }
 
 type Log struct {
@@ -47,6 +48,7 @@ func New() *LogService {
 		caseSensitive := sub.URL.Query().Get("caseSensitive") == "true"
 		after := sub.URL.Query().Get("after")
 		s.sessions.Set(streamID, Session{
+			createdAt:     time.Now().UTC(),
 			streamID:      streamID,
 			query:         query,
 			after:         after,
@@ -74,7 +76,14 @@ func (s *LogService) ClearHandler() iris.Handler {
 		s.logs = make([]Log, 0)
 		for key, entry := range s.sessions.Items() {
 			session, ok := entry.Object.(Session)
-			if ok && session.after != "" {
+			if !ok {
+				continue
+			}
+			if session.createdAt.Before(time.Now().UTC().Add(-time.Hour * 24)) {
+				s.sessions.Delete(key)
+				continue
+			}
+			if session.after != "" {
 				session.after = ""
 				s.sessions.Set(key, session, cache.NoExpiration)
 			}
