@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useLayoutEffect } from "react";
 import { nanoid } from "nanoid";
 import { Card } from "@/components/ui/card";
 import { ControlBar } from "./components/ControlBar";
@@ -21,6 +21,12 @@ export function App() {
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   const logListRef = useRef<LogListRef>(null);
+
+  useLayoutEffect(() => {
+    if (config.command) {
+      document.title = `uitail | ${config.command}`;
+    }
+  }, []);
 
   useEffect(() => {
     const url = new URL(`${config.backendURL}${config.routes.events}`);
