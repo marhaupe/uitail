@@ -56,7 +56,9 @@ export const ControlBar = forwardRef(function ControlBar(
   useEffect(() => {
     const subscription = watch((value, { name }) => {
       if (name !== "query") {
-        onFilterStateChange(value);
+        onFilterStateChange({
+          [name as keyof FilterState]: value[name as keyof FilterState] || undefined,
+        });
       }
     });
     return () => {
