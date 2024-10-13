@@ -1,4 +1,3 @@
-import { forwardRef, useImperativeHandle, useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -7,6 +6,8 @@ import { Circle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { FilterInput } from "@/components/FilterInput";
 import debounce from "lodash.debounce";
+import { useHotkeys } from "react-hotkeys-hook";
+import { useEffect, useMemo } from "react";
 
 type Props = {
   status: "active" | "inactive";
@@ -24,18 +25,15 @@ export type FilterState = {
   regex?: boolean;
 };
 
-export const ControlBar = forwardRef(function ControlBar(
-  {
-    status,
-    filter,
-    onFilterStateChange,
-    onClear,
-    onRestart,
-    onScrollToTop,
-    onScrollToBottom,
-  }: Props,
-  ref
-) {
+export function ControlBar({
+  status,
+  filter,
+  onFilterStateChange,
+  onClear,
+  onRestart,
+  onScrollToTop,
+  onScrollToBottom,
+}: Props) {
   const { register, watch, setFocus, setValue } = useForm({
     defaultValues: {
       query: filter.query,
@@ -44,14 +42,29 @@ export const ControlBar = forwardRef(function ControlBar(
     },
   });
 
-  useImperativeHandle(ref, () => ({
-    focus: () => {
+  useHotkeys(
+    "/",
+    () => {
       setFocus("query");
     },
-    blur: () => {
+    {
+      enableOnFormTags: true,
+      preventDefault: true,
+      ignoreEventWhen: () => {
+        return document.activeElement === document.getElementById("query-input");
+      },
+    }
+  );
+
+  useHotkeys(
+    "escape",
+    () => {
       document.getElementById("query-input")?.blur();
     },
-  }));
+    {
+      enableOnFormTags: true,
+    }
+  );
 
   useEffect(() => {
     const subscription = watch((value, { name }) => {
@@ -170,4 +183,4 @@ export const ControlBar = forwardRef(function ControlBar(
       </div>
     </TooltipProvider>
   );
-});
+}

@@ -19,8 +19,6 @@ export function Home() {
     after: withDefault(StringParam, undefined),
   });
 
-  const searchInputRef = useRef<HTMLInputElement>(null);
-
   const logListRef = useRef<LogListRef>(null);
 
   useLayoutEffect(() => {
@@ -105,27 +103,6 @@ export function Home() {
     }
   );
 
-  useHotkeys(
-    "/",
-    () => {
-      searchInputRef.current?.focus();
-    },
-    {
-      enableOnFormTags: true,
-      preventDefault: true,
-    }
-  );
-
-  useHotkeys(
-    "escape",
-    () => {
-      searchInputRef.current?.blur();
-    },
-    {
-      enableOnFormTags: true,
-    }
-  );
-
   const handleFilterStateChange = useCallback(
     (query: FilterState) => {
       setFilterState((prev) => ({
@@ -143,7 +120,6 @@ export function Home() {
           <ControlBar
             status={connectionStatus}
             filter={filterState}
-            ref={searchInputRef}
             onFilterStateChange={handleFilterStateChange}
             onClear={handleClear}
             onRestart={handleRestart}
