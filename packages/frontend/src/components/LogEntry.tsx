@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Log } from "@/types";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 export interface LogEntryProps {
   log: Log;
@@ -74,6 +75,7 @@ export function LogEntry({
 
   function copyToClipboard() {
     navigator.clipboard.writeText(log.message);
+    toast.success("Copied to clipboard");
   }
 
   return (
