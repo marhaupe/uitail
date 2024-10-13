@@ -48,7 +48,7 @@ export function FilterInput({
                   aria-label="Use Regular Expression"
                   pressed={regex}
                   onPressedChange={onRegexChange}
-                  className="font-mono text-xs"
+                  className="font-mono text-xs border border-r-0 rounded-none"
                 >
                   .*
                 </Toggle>
@@ -65,7 +65,7 @@ export function FilterInput({
                   aria-label="Match Case"
                   pressed={caseSensitive}
                   onPressedChange={onCaseSensitiveChange}
-                  className="font-mono text-xs"
+                  className="font-mono text-xs border rounded-none rounded-tr-md rounded-br-md"
                 >
                   Aa
                 </Toggle>
