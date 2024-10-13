@@ -5,12 +5,12 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontalIcon } from "lucide-react";
+import { CopyIcon, LinkIcon, MoreHorizontalIcon } from "lucide-react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Log } from "@/types";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 export interface LogEntryProps {
   log: Log;
@@ -27,6 +27,7 @@ export function LogEntry({
   onDropdownOpenChange,
   isDropdownOpen,
 }: LogEntryProps) {
+  const router = useNavigate();
   const [isHovered, setIsHovered] = useState(false);
   const [selectedMenuItem, setSelectedMenuItem] = useState<number>(0);
   const menuItemRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -115,15 +116,20 @@ export function LogEntry({
             <DropdownMenuItem
               ref={(el) => (menuItemRefs.current[0] = el)}
               onClick={copyToClipboard}
-              className={cn(selectedMenuItem === 0 && "bg-slate-100")}
+              className={cn("flex gap-2", selectedMenuItem === 0 && "bg-slate-100")}
             >
+              <CopyIcon className="size-4" />
               Copy message
             </DropdownMenuItem>
             <DropdownMenuItem
               ref={(el) => (menuItemRefs.current[1] = el)}
-              className={cn(selectedMenuItem === 1 && "bg-slate-100")}
+              onClick={() => {
+                router(`/logs/${log.id}`);
+              }}
+              className={cn("flex gap-2", selectedMenuItem === 1 && "bg-slate-100")}
             >
-              <Link to={`/logs/${log.id}`}>Show surrounding logs</Link>
+              <LinkIcon className="size-4" />
+              Show surrounding logs
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
