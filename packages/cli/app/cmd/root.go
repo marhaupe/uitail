@@ -94,6 +94,7 @@ func (a *Root) Start() error {
 		ctx.WriteString("OK")
 	})
 	app.Any("/events", a.logService.EventHandler())
+	app.Get("/logs", a.logService.GetLogs())
 	app.Get("/{asset:path}", a.staticServer.Handler())
 
 	fmt.Printf("🚀 Running uitail on http://localhost:%d\n", port)

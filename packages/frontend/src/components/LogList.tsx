@@ -10,7 +10,6 @@ import React, {
 import { useHotkeys } from "react-hotkeys-hook";
 import { LogEntry } from "./LogEntry";
 import { CardContent } from "./ui/card";
-import { LucideLoaderCircle } from "lucide-react";
 import { VariableSizeList as List, areEqual } from "react-window";
 import { Log } from "@/types";
 
@@ -20,14 +19,14 @@ export interface LogListRef {
   resetVirtualization: () => void;
 }
 
-interface LogListProps {
+interface Props {
   logs: Log[];
 }
 
 const REM_IN_PX = 4;
 const LINE_HEIGHT = 5 * REM_IN_PX;
 
-export const LogList = forwardRef<LogListRef, LogListProps>(({ logs }, ref) => {
+export const LogList = forwardRef<LogListRef, Props>(({ logs }, ref) => {
   const [selectedLogIndex, setSelectedLogIndex] = useState<number | null>(null);
   const [openDropdownIndex, setOpenDropdownIndex] = useState<number | null>(null);
   const listRef = useRef<List>(null);
@@ -134,9 +133,8 @@ export const LogList = forwardRef<LogListRef, LogListProps>(({ logs }, ref) => {
           {Row}
         </List>
       ) : (
-        <CardContent className="text-slate-500 flex flex-row gap-2 flex-1 justify-center items-center h-full">
-          Waiting for logs
-          <LucideLoaderCircle className="animate-spin" />
+        <CardContent className="text-slate-500 flex flex-1 items-center justify-center">
+          No logs found
         </CardContent>
       )}
     </div>

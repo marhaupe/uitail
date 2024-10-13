@@ -1,8 +1,8 @@
 import "./index.css";
-import { App } from "@/App";
 import { Toaster } from "@/components/ui/sonner";
 import { QueryParamProvider } from "use-query-params";
 import { ReactRouter6Adapter } from "use-query-params/adapters/react-router-6";
+import { Outlet } from "react-router-dom";
 
 export function Root() {
   return (
@@ -12,7 +12,7 @@ export function Root() {
         removeDefaultsFromUrl: true,
       }}
     >
-      <App />
+      <Outlet />
       <Toaster />
     </QueryParamProvider>
   );

@@ -17,7 +17,7 @@ export const config = {
   routes: {
     events: "/events",
     restart: "/restart",
-    clear: "/clear",
+    logs: "/logs",
   },
   ...defaultInjectedConfig,
   ...(window.config || {}),

@@ -1,15 +1,15 @@
 import { useEffect, useState, useRef, useLayoutEffect, useCallback } from "react";
 import { nanoid } from "nanoid";
 import { Card } from "@/components/ui/card";
-import { ControlBar, FilterState } from "./components/ControlBar";
-import { config } from "./config";
+import { ControlBar, FilterState } from "../components/ControlBar";
+import { config } from "../config";
 import { useHotkeys } from "react-hotkeys-hook";
-import { LogList, LogListRef } from "./components/LogList";
+import { LogList, LogListRef } from "../components/LogList";
 import { toast } from "sonner";
 import { useQueryParams, StringParam, BooleanParam, withDefault } from "use-query-params";
 import { Log } from "@/types";
 
-export function App() {
+export function Home() {
   const [logs, setLogs] = useState<Log[]>([]);
   const [connectionStatus, setConnectionStatus] = useState<"active" | "inactive">("active");
   const [filterState, setFilterState] = useQueryParams({
@@ -126,7 +126,7 @@ export function App() {
     }
   );
 
-  const onFilterStateChange = useCallback(
+  const handleFilterStateChange = useCallback(
     (query: FilterState) => {
       setFilterState((prev) => ({
         ...prev,
@@ -139,12 +139,12 @@ export function App() {
   return (
     <div className="bg-slate-50 overflow-hidden">
       <div className="md:container md:p-6 h-screen">
-        <Card className="relative flex flex-col flex-1">
+        <Card className="relative flex flex-col flex-1 min-h-60">
           <ControlBar
             status={connectionStatus}
             filter={filterState}
             ref={searchInputRef}
-            onFilterStateChange={onFilterStateChange}
+            onFilterStateChange={handleFilterStateChange}
             onClear={handleClear}
             onRestart={handleRestart}
             onScrollToTop={() => logListRef.current?.scrollToTop()}

@@ -10,6 +10,7 @@ import { useHotkeys } from "react-hotkeys-hook";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Log } from "@/types";
+import { Link } from "react-router-dom";
 
 export interface LogEntryProps {
   log: Log;
@@ -117,6 +118,12 @@ export function LogEntry({
               className={cn(selectedMenuItem === 0 && "bg-slate-100")}
             >
               Copy message
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              ref={(el) => (menuItemRefs.current[1] = el)}
+              className={cn(selectedMenuItem === 1 && "bg-slate-100")}
+            >
+              <Link to={`/logs/${log.id}`}>Show surrounding logs</Link>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

@@ -73,6 +73,25 @@ func (s *LogService) EventHandler() iris.Handler {
 	}
 }
 
+func (s *LogService) GetLogs() iris.Handler {
+	return func(ctx iris.Context) {
+		around := ctx.URLParam("around")
+		if around == "" {
+			ctx.StatusCode(iris.StatusBadRequest)
+			return
+		}
+		beforeCount := ctx.URLParamIntDefault("beforeCount", 10)
+		afterCount := ctx.URLParamIntDefault("afterCount", 10)
+		logs := make([]Log, 0)
+		for i, l := range s.logs {
+			if l.ID == around {
+				logs = append(logs, s.logs[max(0, i-beforeCount):min(len(s.logs), i+afterCount+1)]...)
+			}
+		}
+		ctx.JSON(logs)
+	}
+}
+
 func (s *LogService) Write(p []byte) (n int, err error) {
 	msg := strings.TrimRight(string(p), "\n")
 	msg = stripansi.Strip(msg)
