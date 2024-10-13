@@ -73,7 +73,7 @@ export const ControlBar = forwardRef(function ControlBar(
     const subscription = watch((value, { name }) => {
       if (name === "query") {
         debouncedOnFilterStateChange({
-          query: value.query,
+          query: value.query || undefined,
         });
       }
     });
