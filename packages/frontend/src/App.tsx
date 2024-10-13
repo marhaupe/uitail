@@ -1,7 +1,7 @@
-import { useEffect, useState, useRef, useLayoutEffect } from "react";
+import { useEffect, useState, useRef, useLayoutEffect, useCallback } from "react";
 import { nanoid } from "nanoid";
 import { Card } from "@/components/ui/card";
-import { ControlBar } from "./components/ControlBar";
+import { ControlBar, FilterState } from "./components/ControlBar";
 import { config } from "./config";
 import { useHotkeys } from "react-hotkeys-hook";
 import { LogList, LogListRef } from "./components/LogList";
@@ -126,6 +126,16 @@ export function App() {
     }
   );
 
+  const onFilterStateChange = useCallback(
+    (query: FilterState) => {
+      setFilterState((prev) => ({
+        ...prev,
+        ...query,
+      }));
+    },
+    [setFilterState]
+  );
+
   return (
     <div className="bg-slate-50 overflow-hidden">
       <div className="md:container md:p-6 h-screen">
@@ -134,13 +144,7 @@ export function App() {
             status={connectionStatus}
             filter={filterState}
             ref={searchInputRef}
-            onFilterStateChange={(query) =>
-              setFilterState({
-                regex: Boolean(query.regex) || undefined,
-                caseSensitive: Boolean(query.caseSensitive) || undefined,
-                query: query.query || undefined,
-              })
-            }
+            onFilterStateChange={onFilterStateChange}
             onClear={handleClear}
             onRestart={handleRestart}
             onScrollToTop={() => logListRef.current?.scrollToTop()}

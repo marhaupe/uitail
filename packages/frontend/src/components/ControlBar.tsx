@@ -1,4 +1,4 @@
-import { forwardRef, useImperativeHandle, useEffect } from "react";
+import { forwardRef, useImperativeHandle, useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -6,6 +6,7 @@ import { Trash2, RefreshCw, ChevronsUp, ChevronsDown } from "lucide-react";
 import { Circle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { FilterInput } from "@/components/FilterInput";
+import debounce from "lodash.debounce";
 
 type Props = {
   status: "active" | "inactive";
@@ -53,13 +54,34 @@ export const ControlBar = forwardRef(function ControlBar(
   }));
 
   useEffect(() => {
-    const subscription = watch((value) => {
-      onFilterStateChange(value);
+    const subscription = watch((value, { name }) => {
+      if (name !== "query") {
+        onFilterStateChange(value);
+      }
     });
     return () => {
       subscription.unsubscribe();
     };
   }, [watch, onFilterStateChange, filter]);
+
+  const debouncedOnFilterStateChange = useMemo(
+    () => debounce(onFilterStateChange, 100),
+    [onFilterStateChange]
+  );
+
+  useEffect(() => {
+    const subscription = watch((value, { name }) => {
+      if (name === "query") {
+        debouncedOnFilterStateChange({
+          query: value.query,
+        });
+      }
+    });
+    return () => {
+      subscription.unsubscribe();
+      debouncedOnFilterStateChange.cancel();
+    };
+  }, [watch, onFilterStateChange, debouncedOnFilterStateChange]);
 
   return (
     <TooltipProvider>
