@@ -17,6 +17,7 @@ export interface LogListRef {
   scrollToTop: () => void;
   scrollToBottom: () => void;
   resetVirtualization: () => void;
+  setSelectedLogIndex: (index: number | null) => void;
 }
 
 interface Props {
@@ -105,6 +106,7 @@ export const LogList = forwardRef<LogListRef, Props>(({ logs }, ref) => {
   useImperativeHandle(
     ref,
     (): LogListRef => ({
+      setSelectedLogIndex,
       scrollToTop: () => {
         scrollToIndex(0);
       },

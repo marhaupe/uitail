@@ -7,7 +7,6 @@ import { useLayoutEffect, useRef } from "react";
 import { LoaderFunctionArgs, useLoaderData, useSearchParams } from "react-router-dom";
 
 LogView.loader = async ({ params, request }: LoaderFunctionArgs) => {
-  console.log(`dev: rendering loader`);
   const url = new URL(request.url);
   const around = params.id;
   const beforeCount = url.searchParams.get("beforeCount") || "10";
@@ -16,6 +15,7 @@ LogView.loader = async ({ params, request }: LoaderFunctionArgs) => {
     `${config.backendURL}${config.routes.logs}?around=${around}&beforeCount=${beforeCount}&afterCount=${afterCount}`
   );
   return {
+    id: params.id,
     logs: await response.json(),
   };
 };
@@ -24,11 +24,12 @@ export function LogView() {
   const logListRef = useRef<LogListRef>(null);
   const [, setSearchParams] = useSearchParams();
 
-  const { logs } = useLoaderData() as { logs: Log[] };
+  const { id, logs } = useLoaderData() as { id: string; logs: Log[] };
 
   useLayoutEffect(() => {
     logListRef.current?.resetVirtualization();
-  }, [logs]);
+    logListRef.current?.setSelectedLogIndex(logs.findIndex((log) => log.id === id));
+  }, [logs, id]);
 
   function handleIncrementCount(action: "beforeCount" | "afterCount") {
     setSearchParams(
