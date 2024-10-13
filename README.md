@@ -66,5 +66,6 @@ uitail [options] "command"
 - `l` or `→`: Interact with the log entry (e.g. open, copy, etc.)
 - `/`: Focus the filter input
 - `Esc`: Blur the filter input
+- `ctrl+-` / `ctrl+shift+-`: Navigate between browser history
 
-For a full list of shortcuts, refer to the in-app tooltips.
+For a full list of shortcuts, refer to the in-app tooltips. Most shortcuts are borrowed from VSCode or Vim. Please feel free to submit a PR if you have any suggestions!.
