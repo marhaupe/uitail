@@ -46,7 +46,7 @@ For example:
 uitail "npm run dev"
 ```
 
-This will start the uitail agent and open the UI in your default browser.
+This will start the uitail agent. The UI will be available at `http://localhost:8765`.
 
 ## Usage
 
