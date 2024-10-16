@@ -1,17 +1,23 @@
 package cmd
 
 import (
+	"bufio"
 	"context"
 	"fmt"
 	"os"
+	"os/exec"
+	"runtime"
+	"strings"
 	"time"
 
+	"github.com/fatih/color"
 	"github.com/iris-contrib/middleware/cors"
 	"github.com/kataras/iris/v12"
 	"github.com/marhaupe/uitail/internal/executor"
 	"github.com/marhaupe/uitail/internal/logs"
 	"github.com/marhaupe/uitail/internal/static"
 	"github.com/spf13/cobra"
+	"golang.org/x/term"
 )
 
 var (
@@ -97,7 +103,10 @@ func (a *Root) Start() error {
 	app.Get("/logs", a.logService.GetLogs())
 	app.Get("/{asset:path}", a.staticServer.Handler())
 
-	fmt.Printf("🚀 Running uitail on http://localhost:%d\n", port)
+	clearScreen()
+	printStartupLogs(port)
+	go handleKeyPresses(port)
+
 	return app.Listen(fmt.Sprintf(":%d", port),
 		iris.WithConfiguration(iris.Configuration{
 			DisableStartupLog: true,
@@ -106,4 +115,63 @@ func (a *Root) Start() error {
 			},
 		}),
 	)
+}
+
+func printStartupLogs(port int) {
+	url := fmt.Sprintf("http://localhost:%d", port)
+	fmt.Printf("uitail is running on %s\n\n", color.New(color.FgCyan).Sprintf(url))
+	bold := color.New(color.Bold).SprintFunc()
+	light := color.New(color.FgBlack).SprintFunc()
+	fmt.Println("Shortcuts:")
+	fmt.Printf("› %s | %s\n", bold("w + enter"), light("Open in browser"))
+	fmt.Printf("› %s | %s\n", bold("q + enter"), light("Quit"))
+}
+
+func handleKeyPresses(port int) {
+	reader := bufio.NewReader(os.Stdin)
+	for {
+		input, _ := reader.ReadString('\n')
+		input = strings.TrimSpace(input)
+
+		switch input {
+		case "w":
+			openWebBrowser(port)
+		case "q":
+			os.Exit(0)
+		}
+	}
+}
+
+func openWebBrowser(port int) {
+	url := fmt.Sprintf("http://localhost:%d", port)
+	var err error
+
+	switch runtime.GOOS {
+	case "linux":
+		err = exec.Command("xdg-open", url).Start()
+	case "darwin":
+		err = exec.Command("open", url).Start()
+	default:
+		err = fmt.Errorf("unsupported platform")
+	}
+
+	if err != nil {
+		fmt.Printf("Error opening web browser: %v\n", err)
+	}
+}
+
+func clearScreen() {
+	fd := int(os.Stdout.Fd())
+	if !term.IsTerminal(fd) {
+		return
+	}
+	_, height, err := term.GetSize(fd)
+	if err != nil {
+		return
+	}
+	for i := 0; i < height-2; i++ {
+		fmt.Println()
+	}
+	// Move cursor to top-left corner
+	fmt.Print("\033[0;0H")
 }
