@@ -6,7 +6,7 @@
 
 > A modern, interactive `tail -f` alternative with a beautiful UI
 
-uitail is a powerful tool for developers who need to monitor and analyze log output in real-time. It provides a rich, interactive interface that makes it easy to navigate, search, and filter log entries, enhancing your debugging and monitoring workflow.
+uitail is a tool for developers who need to monitor and analyze log output in real-time. It provides a beautiful interface that makes it easy to navigate, search, and filter log entries, improving your debugging and monitoring workflow.
 
 ![uitail demo](.github/demo.gif)
 
