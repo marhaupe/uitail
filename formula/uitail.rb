@@ -5,22 +5,22 @@
 class Uitail < Formula
   desc ""
   homepage "https://github.com/marhaupe/uitail"
-  version "0.0.9"
+  version "0.0.10"
 
   depends_on "git"
 
   on_macos do
     on_intel do
-      url "https://github.com/marhaupe/uitail/releases/download/v0.0.9/uitail_Darwin_x86_64.tar.gz"
-      sha256 "bfedd57488e9ac5ce41cd689eed4f130ae8a9108bf50e228cbf064ebab1e5115"
+      url "https://github.com/marhaupe/uitail/releases/download/v0.0.10/uitail_Darwin_x86_64.tar.gz"
+      sha256 "2498943ebb5e4338fe2adf7cb8e2bd18110c4b4cfcd7dbcbf9b2925d1f274f26"
 
       def install
         bin.install "uitail"
       end
     end
     on_arm do
-      url "https://github.com/marhaupe/uitail/releases/download/v0.0.9/uitail_Darwin_arm64.tar.gz"
-      sha256 "8a0250e2344b87c45181b2a523f4112bf9bb964c9174da138baadf5f516958cb"
+      url "https://github.com/marhaupe/uitail/releases/download/v0.0.10/uitail_Darwin_arm64.tar.gz"
+      sha256 "89eb6350cdf343f5d8829223a4b1ffd17c8f4cbcfb0e0fab504417a283a5d5a1"
 
       def install
         bin.install "uitail"
@@ -31,8 +31,8 @@ class Uitail < Formula
   on_linux do
     on_intel do
       if Hardware::CPU.is_64_bit?
-        url "https://github.com/marhaupe/uitail/releases/download/v0.0.9/uitail_Linux_x86_64.tar.gz"
-        sha256 "48234259da1538b6fc4596064335fb4fbd3c6889687fb5b17a03a78069919fd0"
+        url "https://github.com/marhaupe/uitail/releases/download/v0.0.10/uitail_Linux_x86_64.tar.gz"
+        sha256 "c41a1a46b98b1136016db5bf5256bebfc616611ffe3c8bead989ce73700a42a7"
 
         def install
           bin.install "uitail"
@@ -41,8 +41,8 @@ class Uitail < Formula
     end
     on_arm do
       if Hardware::CPU.is_64_bit?
-        url "https://github.com/marhaupe/uitail/releases/download/v0.0.9/uitail_Linux_arm64.tar.gz"
-        sha256 "46d88950bd04919bbbdff0f96fee911ecc42fb84a17ec1eceb3e1008d7dac74c"
+        url "https://github.com/marhaupe/uitail/releases/download/v0.0.10/uitail_Linux_arm64.tar.gz"
+        sha256 "6904f4fcd17d7521f8076d6e361c63e9d4414b4dcc97cb5fe1eade8dd32c1fc6"
 
         def install
           bin.install "uitail"
