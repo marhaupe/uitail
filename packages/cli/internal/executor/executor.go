@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"os/exec"
+	"syscall"
 )
 
 type Executor struct {
@@ -21,6 +22,7 @@ func (e *Executor) Run() {
 		e.cmd = exec.Command("bash", "-c", e.Command)
 		e.cmd.Stdout = e.Out
 		e.cmd.Stderr = e.Out
+		e.cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
 		err := e.cmd.Run()
 		if err != nil {
 			if err.Error() == "signal: killed" {
@@ -35,9 +37,12 @@ func (e *Executor) Stop() error {
 	if e.cmd == nil {
 		return nil
 	}
-	err := e.cmd.Process.Kill()
+	err := syscall.Kill(-e.cmd.Process.Pid, syscall.SIGKILL)
+	if err != nil {
+		return err
+	}
 	e.cmd = nil
-	return err
+	return nil
 }
 
 func (e *Executor) Restart() error {
