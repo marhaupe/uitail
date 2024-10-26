@@ -82,12 +82,12 @@ export function Home() {
       const response = await fetch(`${config.backendURL}${config.routes.restart}`, {
         method: "POST",
       });
-      if (response.ok) {
-        toast.success("Agent restarted");
-        setConnectionStatus("active");
+      if (!response.ok) {
+        throw new Error(await response.text());
       }
+      toast.success("Agent restarted");
+      setConnectionStatus("active");
     } catch (error) {
-      console.error("Error restarting agent:", error);
       setConnectionStatus("inactive");
       toast.error("Failed to restart agent");
     }
