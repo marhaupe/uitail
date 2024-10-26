@@ -82,11 +82,11 @@ func (a *Root) Start() error {
 	app.UseRouter(crs)
 
 	iris.RegisterOnInterrupt(func() {
+		a.executor.Stop()
 		timeout := 10 * time.Second
 		ctx, cancel := context.WithTimeout(context.Background(), timeout)
 		defer cancel()
 		app.Shutdown(ctx)
-		a.executor.Stop()
 	})
 
 	app.Post("/restart", func(ctx iris.Context) {
