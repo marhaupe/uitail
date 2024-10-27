@@ -12,6 +12,7 @@ import { LogEntry } from "./LogEntry";
 import { CardContent } from "./ui/card";
 import { VariableSizeList as List, areEqual } from "react-window";
 import { Log } from "@/types";
+import { Search } from "lucide-react";
 
 export interface LogListRef {
   scrollToTop: () => void;
@@ -121,7 +122,7 @@ export const LogList = forwardRef<LogListRef, Props>(({ logs }, ref) => {
   );
 
   return (
-    <div ref={containerRef} style={{ height: "100%" }}>
+    <div ref={containerRef} className="h-full">
       {logs.length > 0 ? (
         <List
           itemKey={(index, data) => data.logs[index].id}
@@ -135,8 +136,11 @@ export const LogList = forwardRef<LogListRef, Props>(({ logs }, ref) => {
           {Row}
         </List>
       ) : (
-        <CardContent className="text-slate-500 flex flex-1 items-center justify-center">
-          No logs found
+        <CardContent className="text-slate-500 h-full flex flex-1 items-center justify-center">
+          <div className="flex flex-row gap-1 items-center">
+            <Search className="size-5" />
+            <p>No logs found</p>
+          </div>
         </CardContent>
       )}
     </div>

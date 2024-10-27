@@ -115,8 +115,8 @@ export function Home() {
 
   return (
     <div className="bg-slate-50 overflow-hidden">
-      <div className="md:container md:p-6 h-screen">
-        <Card className="relative flex flex-col flex-1 min-h-60">
+      <div className="md:container md:px-6 h-screen flex flex-col">
+        <Card className="my-2">
           <ControlBar
             status={connectionStatus}
             filter={filterState}
@@ -126,6 +126,8 @@ export function Home() {
             onScrollToTop={() => logListRef.current?.scrollToTop()}
             onScrollToBottom={() => logListRef.current?.scrollToBottom()}
           />
+        </Card>
+        <Card className="relative flex flex-col flex-1 min-h-60 rounded-sm">
           <LogList ref={logListRef} logs={logs} />
         </Card>
       </div>
