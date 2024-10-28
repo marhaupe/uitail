@@ -101,7 +101,7 @@ export function ControlBar({
   return (
     <TooltipProvider>
       <div className="sticky rounded-md top-0 p-2 bg-background z-50">
-        <div className="flex flex-col items-end md:flex-row md:items-center h-20 md:h-10 text-sm gap-2">
+        <div className="flex flex-col items-start md:flex-row md:items-center h-20 md:h-10 text-sm gap-2">
           <FilterInput
             register={register}
             caseSensitive={watch("caseSensitive") ?? false}
@@ -110,7 +110,7 @@ export function ControlBar({
             onCaseSensitiveChange={(pressed) => setValue("caseSensitive", pressed)}
             onRegexChange={(pressed) => setValue("regex", pressed)}
           />
-          <div className="flex items-center space-x-1">
+          <div className="flex items-center max-md:w-full gap-1">
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button variant="ghost" size="sm" onClick={onScrollToTop}>
@@ -163,7 +163,7 @@ export function ControlBar({
 
             <Tooltip>
               <TooltipTrigger asChild>
-                <div className={buttonVariants({ variant: "ghost", size: "sm" })}>
+                <div className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "ml-auto")}>
                   <Circle
                     className={cn(
                       "size-2 animate-pulse",
