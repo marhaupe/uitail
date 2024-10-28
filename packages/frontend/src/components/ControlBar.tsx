@@ -175,7 +175,7 @@ export function ControlBar({
                 </div>
               </TooltipTrigger>
               <TooltipContent>
-                <p>{status === "active" ? "Agent running" : "Agent disconnected"}</p>
+                <p>{status === "active" ? "Agent running" : "Waiting for connection"}</p>
               </TooltipContent>
             </Tooltip>
           </div>

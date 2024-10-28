@@ -128,7 +128,7 @@ export function Home() {
           />
         </Card>
         <Card className="relative flex flex-col flex-1 min-h-60 rounded-sm">
-          <LogList ref={logListRef} logs={logs} />
+          <LogList connectionStatus={connectionStatus} ref={logListRef} logs={logs} />
         </Card>
       </div>
     </div>

@@ -12,7 +12,7 @@ import { LogEntry } from "./LogEntry";
 import { CardContent } from "./ui/card";
 import { VariableSizeList as List, areEqual } from "react-window";
 import { Log } from "@/types";
-import { Search } from "lucide-react";
+import { Loader2 } from "lucide-react";
 
 export interface LogListRef {
   scrollToTop: () => void;
@@ -23,12 +23,13 @@ export interface LogListRef {
 
 interface Props {
   logs: Log[];
+  connectionStatus: "active" | "inactive";
 }
 
 const REM_IN_PX = 4;
 const LINE_HEIGHT = 5 * REM_IN_PX;
 
-export const LogList = forwardRef<LogListRef, Props>(({ logs }, ref) => {
+export const LogList = forwardRef<LogListRef, Props>(({ logs, connectionStatus }, ref) => {
   const [selectedLogIndex, setSelectedLogIndex] = useState<number | null>(null);
   const [openDropdownIndex, setOpenDropdownIndex] = useState<number | null>(null);
   const listRef = useRef<List>(null);
@@ -137,10 +138,17 @@ export const LogList = forwardRef<LogListRef, Props>(({ logs }, ref) => {
         </List>
       ) : (
         <CardContent className="text-slate-500 h-full flex flex-1 items-center justify-center">
-          <div className="flex flex-row gap-1 items-center">
-            <Search className="size-5" />
-            <p>No logs found</p>
-          </div>
+          {connectionStatus === "inactive" ? (
+            <div className="flex flex-row gap-1 items-center">
+              <Loader2 className="size-5 animate-spin" />
+              <p>Connecting...</p>
+            </div>
+          ) : (
+            <div className="flex flex-row gap-1 items-center">
+              <Loader2 className="size-5 animate-spin" />
+              <p>Waiting for logs...</p>
+            </div>
+          )}
         </CardContent>
       )}
     </div>
