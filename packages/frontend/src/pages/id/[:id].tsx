@@ -16,7 +16,7 @@ LogView.loader = async ({ params, request }: LoaderFunctionArgs) => {
   );
   return {
     id: params.id,
-    logs: await response.json(),
+    logs: (await response.json()) as Log[],
   };
 };
 
@@ -24,7 +24,7 @@ export function LogView() {
   const logListRef = useRef<LogListRef>(null);
   const [, setSearchParams] = useSearchParams();
 
-  const { id, logs } = useLoaderData() as { id: string; logs: Log[] };
+  const { id, logs } = useLoaderData() as Awaited<ReturnType<typeof LogView.loader>>;
 
   useLayoutEffect(() => {
     logListRef.current?.resetVirtualization();
@@ -61,7 +61,7 @@ export function LogView() {
               Show more after
             </Button>
           </div>
-          <LogList logs={logs} ref={logListRef} />
+          <LogList logs={logs} ref={logListRef} connectionStatus="active" />
         </Card>
       </div>
     </div>
