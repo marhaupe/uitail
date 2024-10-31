@@ -9,7 +9,6 @@ import React, {
 } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { LogEntry } from "./LogEntry";
-import { CardContent } from "./ui/card";
 import { VariableSizeList as List, areEqual } from "react-window";
 import { Log } from "@/types";
 import { Loader2 } from "lucide-react";
@@ -137,7 +136,7 @@ export const LogList = forwardRef<LogListRef, Props>(({ logs, connectionStatus }
           {Row}
         </List>
       ) : (
-        <CardContent className="text-slate-500 h-full flex flex-1 items-center justify-center">
+        <div className="text-slate-500 h-full flex flex-1 items-center justify-center">
           {connectionStatus === "inactive" ? (
             <div className="flex flex-row gap-1 items-center">
               <Loader2 className="size-5 animate-spin" />
@@ -149,7 +148,7 @@ export const LogList = forwardRef<LogListRef, Props>(({ logs, connectionStatus }
               <p>Waiting for logs...</p>
             </div>
           )}
-        </CardContent>
+        </div>
       )}
     </div>
   );

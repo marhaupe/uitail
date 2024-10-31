@@ -1,6 +1,5 @@
 import { useEffect, useState, useRef, useLayoutEffect, useCallback } from "react";
 import { nanoid } from "nanoid";
-import { Card } from "@/components/ui/card";
 import { ControlBar, FilterState } from "../components/ControlBar";
 import { config } from "../config";
 import { useHotkeys } from "react-hotkeys-hook";
@@ -114,9 +113,9 @@ export function Home() {
   );
 
   return (
-    <div className="bg-slate-50 overflow-hidden">
-      <div className="md:container md:px-6 h-screen flex flex-col">
-        <Card className="md:my-2">
+    <div className="bg-slate-100 overflow-hidden">
+      <div className="md:container md:px-0 bg-white border-slate-200 border-2 h-screen flex flex-col">
+        <div className="border-b">
           <ControlBar
             status={connectionStatus}
             filter={filterState}
@@ -126,10 +125,8 @@ export function Home() {
             onScrollToTop={() => logListRef.current?.scrollToTop()}
             onScrollToBottom={() => logListRef.current?.scrollToBottom()}
           />
-        </Card>
-        <Card className="max-md:border-t-0 relative flex flex-col flex-1 min-h-60 rounded-sm">
-          <LogList connectionStatus={connectionStatus} ref={logListRef} logs={logs} />
-        </Card>
+        </div>
+        <LogList connectionStatus={connectionStatus} ref={logListRef} logs={logs} />
       </div>
     </div>
   );

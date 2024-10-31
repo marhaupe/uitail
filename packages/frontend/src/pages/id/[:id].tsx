@@ -1,6 +1,5 @@
 import { LogList, LogListRef } from "@/components/LogList";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { config } from "@/config";
 import { Log } from "@/types";
 import { useLayoutEffect, useRef } from "react";
@@ -42,9 +41,9 @@ export function LogView() {
   }
 
   return (
-    <div className="bg-slate-50 overflow-hidden">
-      <div className="md:container md:p-6 h-screen">
-        <Card className="relative flex flex-col flex-1 min-h-60">
+    <div className="bg-slate-100 overflow-hidden">
+      <div className="md:container md:px-0 h-screen bg-white">
+        <div className="flex border-slate-200 border-2 flex-col flex-1 min-h-60">
           <div className="flex flex-row border-b divide-x">
             <Button
               className="flex-1 rounded-none"
@@ -62,7 +61,7 @@ export function LogView() {
             </Button>
           </div>
           <LogList logs={logs} ref={logListRef} connectionStatus="active" />
-        </Card>
+        </div>
       </div>
     </div>
   );
