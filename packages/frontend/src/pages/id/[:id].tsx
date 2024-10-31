@@ -41,9 +41,9 @@ export function LogView() {
   }
 
   return (
-    <div className="bg-slate-100 overflow-hidden">
+    <div className="bg-slate-50 overflow-hidden">
       <div className="md:container md:px-0 h-screen bg-white">
-        <div className="flex border-slate-200 border-2 flex-col flex-1 min-h-60">
+        <div className="flex border-slate-100 border-2 flex-col flex-1 min-h-60">
           <div className="flex flex-row border-b divide-x">
             <Button
               className="flex-1 rounded-none"

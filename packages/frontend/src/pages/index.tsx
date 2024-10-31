@@ -113,8 +113,8 @@ export function Home() {
   );
 
   return (
-    <div className="bg-slate-100 overflow-hidden">
-      <div className="md:container md:px-0 bg-white border-slate-200 border-2 h-screen flex flex-col">
+    <div className="bg-slate-50 overflow-hidden">
+      <div className="md:container md:px-0 bg-white border-slate-100 border-2 h-screen flex flex-col">
         <div className="border-b">
           <ControlBar
             status={connectionStatus}
