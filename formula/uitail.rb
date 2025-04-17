@@ -5,22 +5,22 @@
 class Uitail < Formula
   desc ""
   homepage "https://github.com/marhaupe/uitail"
-  version "0.0.11"
+  version "0.0.12"
 
   depends_on "git"
 
   on_macos do
-    on_intel do
-      url "https://github.com/marhaupe/uitail/releases/download/v0.0.11/uitail_Darwin_x86_64.tar.gz"
-      sha256 "cebe4df9f52945ab88b5bffb5b193bb6f4a8655daa80b259e522f4d0fcb1228e"
+    if Hardware::CPU.intel?
+      url "https://github.com/marhaupe/uitail/releases/download/v0.0.12/uitail_Darwin_x86_64.tar.gz"
+      sha256 "f4663d487d4c510cd19d0ea609583b8a7d93fedcfa57a1dee2eab436e3f3b945"
 
       def install
         bin.install "uitail"
       end
     end
-    on_arm do
-      url "https://github.com/marhaupe/uitail/releases/download/v0.0.11/uitail_Darwin_arm64.tar.gz"
-      sha256 "4364fc0cdc1287eca1b3a8e2e21e815012c83f98b36c685c42661cd6085f9ffe"
+    if Hardware::CPU.arm?
+      url "https://github.com/marhaupe/uitail/releases/download/v0.0.12/uitail_Darwin_arm64.tar.gz"
+      sha256 "3602d6e55a23085f72fc05c8ee8d96f65876655d26ae4389e65713f826ce3f78"
 
       def install
         bin.install "uitail"
@@ -29,20 +29,20 @@ class Uitail < Formula
   end
 
   on_linux do
-    on_intel do
+    if Hardware::CPU.intel?
       if Hardware::CPU.is_64_bit?
-        url "https://github.com/marhaupe/uitail/releases/download/v0.0.11/uitail_Linux_x86_64.tar.gz"
-        sha256 "ba6cef4e92f6af6cc1fc7281d34817752c855037f9ded871479a8af3ddccb4cd"
+        url "https://github.com/marhaupe/uitail/releases/download/v0.0.12/uitail_Linux_x86_64.tar.gz"
+        sha256 "aae5fdcbe7f684490b179a2686127f0fa0a2eff0761d1317db11677360f41b18"
 
         def install
           bin.install "uitail"
         end
       end
     end
-    on_arm do
+    if Hardware::CPU.arm?
       if Hardware::CPU.is_64_bit?
-        url "https://github.com/marhaupe/uitail/releases/download/v0.0.11/uitail_Linux_arm64.tar.gz"
-        sha256 "547a152e506f210b3712c6b3c91746050cb383949d3ed21cb978593d01a19411"
+        url "https://github.com/marhaupe/uitail/releases/download/v0.0.12/uitail_Linux_arm64.tar.gz"
+        sha256 "181c77fabf719ed09ff5b61de88e6f7f087d8fc818111491454fa00cfd4417e3"
 
         def install
           bin.install "uitail"
