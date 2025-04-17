@@ -89,11 +89,11 @@ export function LogEntry({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <div className="flex-shrink-0 text-slate-400">
+      <div className="max-md:hidden flex-shrink-0 text-slate-400">
         {new Date(log.timestamp).toISOString().split("T")[1]}
       </div>
       <div
-        className="flex-grow whitespace-pre overflow-x-auto flex-col min-h-5 leading-5"
+        className="flex-grow whitespace-pre overflow-x-visible flex-col min-h-5 leading-5"
         style={{ scrollbarWidth: "none" }}
       >
         {log.message}
